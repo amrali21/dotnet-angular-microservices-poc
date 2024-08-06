@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using nextjs_backend.Helpers;
 
 namespace nextjs_backend.Models
 {
@@ -85,7 +86,7 @@ namespace nextjs_backend.Models
 
             modelBuilder.Entity<Revenue>(entity =>
             {
-                entity.HasNoKey();
+                entity.HasKey(e => new { e.Month, e.Revenue1 });
 
                 entity.ToTable("revenue");
 
@@ -127,8 +128,15 @@ namespace nextjs_backend.Models
                     .HasColumnName("password");
             });
 
+            modelBuilder.Seed();
+
             OnModelCreatingPartial(modelBuilder);
         }
+
+        void seedData(ModelBuilder modelBuilder)
+        {
+
+        }                       
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
