@@ -123,7 +123,9 @@ namespace nextjs_backend.Controllers
                                 select new
                                 {
                                     id = c.Id,
-                                    name = c.Name
+                                    name = c.Name,
+                                    email = c.Email,
+                                    image_url = c.ImageUrl
                                 }).ToListAsync();               
 
             return Ok(output);
