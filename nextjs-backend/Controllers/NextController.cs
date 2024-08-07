@@ -132,8 +132,108 @@ namespace nextjs_backend.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> fetchFilteredCustomers()
+        public async Task<IActionResult> fetchCustomerByID(string id)
         {
+            var output = await (from c in _nextjstestContext.Customers
+                                orderby c.Name
+                                where c.Id == id
+                                select new
+                                {
+                                    id = c.Id,
+                                    name = c.Name,
+                                    email = c.Email,
+                                    image_url = c.ImageUrl
+                                }).FirstOrDefaultAsync();
+
+            return Ok(output);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> updateCustomer(/*[FromBody] UpdatedInvoice invoice*/)
+        {
+            return Ok();
+            UpdatedInvoice invoice;
+            try
+            {
+                using StreamReader streamReader = new(Request.Body);
+                invoice = JsonConvert.DeserializeObject<UpdatedInvoice>(await streamReader.ReadToEndAsync());
+
+                if (invoice == null)
+                    return BadRequest("Can't deserialize");
+            }
+            catch
+            {
+                return BadRequest("Couldn't parse formula");
+            }
+            Invoice? oldInvoice = await _nextjstestContext.Invoices.FirstOrDefaultAsync(i => i.Id == invoice.id);
+            try
+            {
+                oldInvoice.CustomerId = invoice.customerId;
+                oldInvoice.Amount = invoice.amount;
+                oldInvoice.Status = invoice.status;
+
+                await _nextjstestContext.SaveChangesAsync();
+            }
+            catch
+            {
+                return StatusCode(500);
+            }
+
+            return Ok();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> fetchFilteredCustomers(string? query, int itemsPerPage, int offset)
+        {
+            var output = await (from c in _nextjstestContext.Customers
+                                orderby c.Name
+                                where ((query == "" || query == null) || c.Name.StartsWith(query))
+                                select new
+                                {
+                                    id = c.Id,
+                                    name = c.Name,
+                                    email = c.Email,
+                                    image_url = c.ImageUrl
+                                }).Skip(offset).Take(itemsPerPage).ToListAsync();
+
+            return Ok(output);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> fetchCustomerPages(string? query) // linq error
+        {
+            var output = await (from c in _nextjstestContext.Customers
+                                orderby c.Name
+                                where ((query == "" || query == null) || c.Name.StartsWith(query))
+                                select new
+                                {
+                                    id = c.Id,
+                                    name = c.Name,
+                                    email = c.Email,
+                                    image_url = c.ImageUrl
+                                }).CountAsync();
+
+            return Ok(output);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> deleteCustomer(string id)
+        {
+            if (!await _nextjstestContext.Customers.AnyAsync(i => i.Id == id))
+                return BadRequest("invoice not found");
+
+            Customer customer = await _nextjstestContext.Customers.FirstAsync(i => i.Id == id);
+
+            try
+            {
+                _nextjstestContext.Customers.Remove(customer);
+                await _nextjstestContext.SaveChangesAsync();
+            }
+            catch
+            {
+                return StatusCode(500);
+            }
+
             return Ok();
         }
 
