@@ -185,18 +185,26 @@ namespace nextjs_backend.Controllers
         [HttpGet]
         public async Task<IActionResult> fetchFilteredCustomers(string? query, int itemsPerPage, int offset)
         {
-            var output = await (from c in _nextjstestContext.Customers
-                                orderby c.Name
-                                where ((query == "" || query == null) || c.Name.StartsWith(query))
-                                select new
-                                {
-                                    id = c.Id,
-                                    name = c.Name,
-                                    email = c.Email,
-                                    image_url = c.ImageUrl
-                                }).Skip(offset).Take(itemsPerPage).ToListAsync();
+            var output = (from c in _nextjstestContext.Customers
+                          orderby c.Name
+                          where ((query == "" || query == null) || c.Name.StartsWith(query))
+                          select new
+                          {
+                              id = c.Id,
+                              name = c.Name,
+                              email = c.Email,
+                              image_url = c.ImageUrl
+                          }).AsQueryable();
 
-            return Ok(output);
+            return Ok(
+                new
+                {
+                    data = await output.Skip(offset).Take(itemsPerPage).ToListAsync(),
+                    count = output.Count()
+                }
+            );
+
+
         }
 
         [HttpGet]

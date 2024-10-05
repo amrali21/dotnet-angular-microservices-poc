@@ -9,60 +9,60 @@ namespace nextjs_backend.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            //migrationBuilder.CreateTable(
-            //    name: "customers",
-            //    columns: table => new
-            //    {
-            //        id = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false),
-            //        name = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false),
-            //        email = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false),
-            //        image_url = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false)
-            //    },
-            //    constraints: table =>
-            //    {
-            //        table.PrimaryKey("PK_customers", x => x.id);
-            //    });
+            migrationBuilder.CreateTable(
+                name: "customers",
+                columns: table => new
+                {
+                    id = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false),
+                    name = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false),
+                    email = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false),
+                    image_url = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_customers", x => x.id);
+                });
 
-            //migrationBuilder.CreateTable(
-            //    name: "invoices",
-            //    columns: table => new
-            //    {
-            //        id = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false),
-            //        customer_id = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false),
-            //        amount = table.Column<int>(type: "int", nullable: false),
-            //        status = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false),
-            //        date = table.Column<DateTime>(type: "date", nullable: false)
-            //    },
-            //    constraints: table =>
-            //    {
-            //        table.PrimaryKey("PK_invoices", x => x.id);
-            //    });
+            migrationBuilder.CreateTable(
+                name: "invoices",
+                columns: table => new
+                {
+                    id = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false),
+                    customer_id = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false),
+                    amount = table.Column<int>(type: "int", nullable: false),
+                    status = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false),
+                    date = table.Column<DateTime>(type: "date", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_invoices", x => x.id);
+                });
 
-            //migrationBuilder.CreateTable(
-            //    name: "revenue",
-            //    columns: table => new
-            //    {
-            //        month = table.Column<string>(type: "varchar(4)", unicode: false, maxLength: 4, nullable: false),
-            //        revenue = table.Column<int>(type: "int", nullable: false)
-            //    },
-            //    constraints: table =>
-            //    {
-            //        table.PrimaryKey("PK_revenue", x => new { x.month, x.revenue });
-            //    });
+            migrationBuilder.CreateTable(
+                name: "revenue",
+                columns: table => new
+                {
+                    month = table.Column<string>(type: "varchar(4)", unicode: false, maxLength: 4, nullable: false),
+                    revenue = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_revenue", x => new { x.month, x.revenue });
+                });
 
-            //migrationBuilder.CreateTable(
-            //    name: "users",
-            //    columns: table => new
-            //    {
-            //        id = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false),
-            //        name = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false),
-            //        email = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false),
-            //        password = table.Column<string>(type: "text", nullable: false)
-            //    },
-            //    constraints: table =>
-            //    {
-            //        table.PrimaryKey("PK_users", x => x.id);
-            //    });
+            migrationBuilder.CreateTable(
+                name: "users",
+                columns: table => new
+                {
+                    id = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false),
+                    name = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false),
+                    email = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false),
+                    password = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_users", x => x.id);
+                });
 
             migrationBuilder.InsertData(
                 table: "customers",
@@ -127,17 +127,17 @@ namespace nextjs_backend.Migrations
                 columns: new[] { "id", "email", "name", "password" },
                 values: new object[] { "410544b2-4001-4271-9855-fec4b6a6442a", "user@nextmail.com", "User", "123456" });
 
-            //migrationBuilder.CreateIndex(
-            //    name: "UQ__revenue__0DD75472E02AC0B3",
-            //    table: "revenue",
-            //    column: "month",
-            //    unique: true);
+            migrationBuilder.CreateIndex(
+                name: "UQ__revenue__0DD75472E02AC0B3",
+                table: "revenue",
+                column: "month",
+                unique: true);
 
-            //migrationBuilder.CreateIndex(
-            //    name: "UQ__users__AB6E6164F19C174A",
-            //    table: "users",
-            //    column: "email",
-            //    unique: true);
+            migrationBuilder.CreateIndex(
+                name: "UQ__users__AB6E6164F19C174A",
+                table: "users",
+                column: "email",
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
