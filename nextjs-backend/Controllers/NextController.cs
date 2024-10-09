@@ -67,7 +67,7 @@ namespace nextjs_backend.Controllers
         [HttpGet]
         public async Task<IActionResult> fetchFilteredInvoices(string? query, int itemsPerPage, int offset) // linq error
         {
-            var output = await (from i in _nextjstestContext.Invoices
+            var output =  (from i in _nextjstestContext.Invoices
              join c in _nextjstestContext.Customers
              on i.CustomerId equals c.Id
              where query == null || (c.Name.Contains(query) || c.Email.Contains(query) /*|| i.Amount.ToString().Contains(query) ||
@@ -81,9 +81,14 @@ namespace nextjs_backend.Controllers
                  name = c.Name,
                  email = c.Email,
                  image_url = c.ImageUrl
-             }).Skip(offset).Take(itemsPerPage).ToListAsync();
+             }).AsQueryable();
 
-            return Ok(output);
+            return Ok(
+            new
+            {
+                data = await output.Skip(offset).Take(itemsPerPage).ToListAsync(),
+                count = output.Count()
+            });
         }
 
         [HttpGet]
@@ -99,16 +104,19 @@ namespace nextjs_backend.Controllers
             return Ok(output);
         }
 
-        [HttpGet]
+        [HttpGet("{id}")]
         public async Task<IActionResult> fetchInvoiceById(string id)
         {
             var output = await (from i in _nextjstestContext.Invoices
+                                join c in _nextjstestContext.Customers
+                                on i.CustomerId equals c.Id
                                 where i.Id == id
                                 select new
                                 {
                                     id = i.Id,
+                                    name = c.Name,
                                     customer_id = i.CustomerId,
-                                    amount = i.Amount / 100,
+                                    amount = i.Amount,
                                     status = i.Status
                                 }).FirstOrDefaultAsync();
 
@@ -305,7 +313,7 @@ namespace nextjs_backend.Controllers
             Invoice? oldInvoice = await _nextjstestContext.Invoices.FirstOrDefaultAsync(i => i.Id == invoice.id);
             try
             {
-                oldInvoice.CustomerId = invoice.customerId;
+                //oldInvoice.CustomerId = invoice.customerId;
                 oldInvoice.Amount = invoice.amount;
                 oldInvoice.Status = invoice.status;
 
