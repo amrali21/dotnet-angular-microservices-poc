@@ -1,9 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.1.32328.378
+# Visual Studio Version 18
+VisualStudioVersion = 18.5.11716.220
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nextjs-backend", "nextjs-backend\nextjs-backend.csproj", "{630D2410-5670-40CD-9C00-1B85E14D243C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nextjs-backend-cust-service", "nextjs-backend-cust-service\nextjs-backend-cust-service.csproj", "{D51F94D6-D8B8-422E-A40F-5155210BCF22}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nextjs-backend-dashboard-service", "nextjs-backend-dashboard-service\nextjs-backend-dashboard-service.csproj", "{22FA8122-78D9-4665-9FDC-FD395AAFD0AF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "next-api-gateway", "next-api-gateway\next-api-gateway.csproj", "{57E5D5E3-5FE8-445C-92F4-B7867C40F79A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +21,18 @@ Global
 		{630D2410-5670-40CD-9C00-1B85E14D243C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{630D2410-5670-40CD-9C00-1B85E14D243C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{630D2410-5670-40CD-9C00-1B85E14D243C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D51F94D6-D8B8-422E-A40F-5155210BCF22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D51F94D6-D8B8-422E-A40F-5155210BCF22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D51F94D6-D8B8-422E-A40F-5155210BCF22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D51F94D6-D8B8-422E-A40F-5155210BCF22}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22FA8122-78D9-4665-9FDC-FD395AAFD0AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22FA8122-78D9-4665-9FDC-FD395AAFD0AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22FA8122-78D9-4665-9FDC-FD395AAFD0AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22FA8122-78D9-4665-9FDC-FD395AAFD0AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57E5D5E3-5FE8-445C-92F4-B7867C40F79A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57E5D5E3-5FE8-445C-92F4-B7867C40F79A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57E5D5E3-5FE8-445C-92F4-B7867C40F79A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57E5D5E3-5FE8-445C-92F4-B7867C40F79A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

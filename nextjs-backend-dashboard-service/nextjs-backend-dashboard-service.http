@@ -1,0 +1,6 @@
+@nextjs_backend_dashboard_service_HostAddress = http://localhost:5208
+
+GET {{nextjs_backend_dashboard_service_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

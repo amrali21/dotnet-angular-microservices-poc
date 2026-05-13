@@ -17,6 +17,7 @@
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+    <PackageReference Include="Steeltoe.Discovery.Eureka" Version="3.2.8" />
   </ItemGroup>
 
 </Project>

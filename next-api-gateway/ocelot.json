@@ -1,0 +1,40 @@
+{
+  "Routes": [
+    {
+      "UpstreamPathTemplate": "/Next/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "DownstreamPathTemplate": "/Next/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "NEXTJS-BACKEND",
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/Customer/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "DownstreamPathTemplate": "/Customer/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "cust-service",
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/Dashboard/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "DownstreamPathTemplate": "/Dashboard/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "dashboard-service",
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    }
+  ],
+  "GlobalConfiguration": {
+    "ServiceDiscoveryProvider": {
+      "Type": "Eureka"
+    },
+    "HttpVersion": "1.1"
+  }
+}

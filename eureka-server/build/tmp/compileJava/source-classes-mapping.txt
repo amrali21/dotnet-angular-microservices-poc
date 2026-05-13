@@ -1,0 +1,2 @@
+net/chrisrichardson/microservices/eurekaserver/EurekaServer.java
+ net.chrisrichardson.microservices.eurekaserver.EurekaServer

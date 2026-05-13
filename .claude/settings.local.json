@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"h:\\\\nextjs\\\\demo projects\\\\backend \\(.net used with into nextjs\\) - separated\\\\nextjs-backend\" -Recurse -Name)",
+      "Bash(Sort-Object)",
+      "Bash(Remove-Item \"h:\\\\nextjs\\\\demo projects\\\\backend \\(.net used with into nextjs\\) - separated\\\\nextjs-backend\\\\nextjs-backend-cust-service\\\\WeatherForecast.cs\" -Force)",
+      "Bash(Remove-Item \"h:\\\\nextjs\\\\demo projects\\\\backend \\(.net used with into nextjs\\) - separated\\\\nextjs-backend\\\\nextjs-backend-cust-service\\\\Controllers\\\\WeatherForecastController.cs\" -Force)",
+      "Bash(Remove-Item \"h:\\\\nextjs\\\\demo projects\\\\backend \\(.net used with into nextjs\\) - separated\\\\nextjs-backend\\\\nextjs-backend-dashboard-service\\\\WeatherForecast.cs\" -Force)",
+      "Bash(Remove-Item \"h:\\\\nextjs\\\\demo projects\\\\backend \\(.net used with into nextjs\\) - separated\\\\nextjs-backend\\\\nextjs-backend-dashboard-service\\\\Controllers\\\\WeatherForecastController.cs\" -Force)",
+      "Bash(Write-Output \"Done\")",
+      "PowerShell(\"Done\")",
+      "PowerShell(dotnet restore \"h:\\\\nextjs\\\\demo projects\\\\backend \\(.net used with into nextjs\\) - separated\\\\nextjs-backend\\\\nextjs-backend-cust-service\\\\nextjs-backend-cust-service.csproj\" 2>&1)",
+      "PowerShell(dotnet restore \"h:\\\\nextjs\\\\demo projects\\\\backend \\(.net used with into nextjs\\) - separated\\\\nextjs-backend\\\\nextjs-backend-dashboard-service\\\\nextjs-backend-dashboard-service.csproj\" 2>&1)",
+      "PowerShell(dotnet build \"h:\\\\nextjs\\\\demo projects\\\\backend \\(.net used with into nextjs\\) - separated\\\\nextjs-backend\\\\nextjs-backend-cust-service\\\\nextjs-backend-cust-service.csproj\" 2>&1)",
+      "PowerShell(dotnet build \"h:\\\\nextjs\\\\demo projects\\\\backend \\(.net used with into nextjs\\) - separated\\\\nextjs-backend\\\\nextjs-backend-dashboard-service\\\\nextjs-backend-dashboard-service.csproj\" 2>&1)"
+    ]
+  }
+}

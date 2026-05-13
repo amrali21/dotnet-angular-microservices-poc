@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using nextjs_backend.Models;
+using Steeltoe.Discovery.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +26,9 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
-builder.Services.AddDbContext<nextjstestContext>();
+builder.Services.AddDbContext<nextjstestContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDiscoveryClient(builder.Configuration);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -42,6 +46,7 @@ if (app.Environment.IsDevelopment())
 
 //app.UseHttpsRedirection();
 
+//app.UseDiscoveryClient();
 app.UseAuthorization();
 
 app.MapControllers();
