@@ -10,10 +10,10 @@ namespace nextjs_backend.Controllers
     //[Route("api/[controller]")]
     [Route("[controller]/[action]")]
     [ApiController]
-    public class NextController : ControllerBase
+    public class InvoiceController : ControllerBase
     {
         nextjstestContext _nextjstestContext;
-        public NextController(nextjstestContext nextjstestContext)
+        public InvoiceController(nextjstestContext nextjstestContext)
         {
             _nextjstestContext = nextjstestContext;
         }

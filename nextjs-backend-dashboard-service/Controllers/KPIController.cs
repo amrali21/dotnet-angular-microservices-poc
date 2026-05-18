@@ -6,10 +6,10 @@ namespace nextjs_backend_dashboard_service.Controllers
 {
     [Route("[controller]/[action]")]
     [ApiController]
-    public class DashboardController : ControllerBase
+    public class KPIController : ControllerBase
     {
         nextjstestContext _nextjstestContext;
-        public DashboardController(nextjstestContext nextjstestContext)
+        public KPIController(nextjstestContext nextjstestContext)
         {
             _nextjstestContext = nextjstestContext;
         }

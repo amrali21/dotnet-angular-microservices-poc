@@ -1,34 +1,37 @@
 {
   "Routes": [
     {
-      "UpstreamPathTemplate": "/Next/{everything}",
+      "UpstreamPathTemplate": "/InvoiceGW/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "DownstreamPathTemplate": "/Next/{everything}",
-      "DownstreamScheme": "http",
-      "ServiceName": "NEXTJS-BACKEND",
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "https",
+      "ServiceName": "invoice-service",
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
-      }
+      },
+      "DangerousAcceptAnyServerCertificateValidator": true
     },
     {
-      "UpstreamPathTemplate": "/Customer/{everything}",
+      "UpstreamPathTemplate": "/CustomerGW/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "DownstreamPathTemplate": "/Customer/{everything}",
-      "DownstreamScheme": "http",
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "https",
       "ServiceName": "cust-service",
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
-      }
+      },
+      "DangerousAcceptAnyServerCertificateValidator": true    
     },
     {
       "UpstreamPathTemplate": "/Dashboard/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "DownstreamPathTemplate": "/Dashboard/{everything}",
-      "DownstreamScheme": "http",
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "https",
       "ServiceName": "dashboard-service",
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
-      }
+      },
+      "DangerousAcceptAnyServerCertificateValidator": true 
     }
   ],
   "GlobalConfiguration": {
