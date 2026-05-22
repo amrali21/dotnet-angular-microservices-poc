@@ -1,0 +1,88 @@
+networks:
+  microservices-net:
+    driver: bridge
+
+services:
+  eureka-server:
+    build:
+      context: ./eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - microservices-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  invoice-service:
+    build:
+      context: ./nextjs-backend-invoice-service
+    container_name: invoice-service
+    ports:
+      - "5052:5052"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:5052
+      - "ConnectionStrings__DefaultConnection=Data Source=host.docker.internal\\SQLEXPRESS;Initial Catalog=nextjs-test;User ID=${SQL_USER};Password=${SQL_PASSWORD};TrustServerCertificate=True"
+    networks:
+      - microservices-net
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  cust-service:
+    build:
+      context: ./nextjs-backend-cust-service
+    container_name: cust-service
+    ports:
+      - "5246:5246"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:5246
+      - "ConnectionStrings__DefaultConnection=Data Source=host.docker.internal\\SQLEXPRESS;Initial Catalog=nextjs-test;User ID=${SQL_USER};Password=${SQL_PASSWORD};TrustServerCertificate=True"
+    networks:
+      - microservices-net
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  dashboard-service:
+    build:
+      context: ./nextjs-backend-dashboard-service
+    container_name: dashboard-service
+    ports:
+      - "5208:5208"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:5208
+      - "ConnectionStrings__DefaultConnection=Data Source=host.docker.internal\\SQLEXPRESS;Initial Catalog=nextjs-test;User ID=${SQL_USER};Password=${SQL_PASSWORD};TrustServerCertificate=True"
+    networks:
+      - microservices-net
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  api-gateway:
+    build:
+      context: ./next-api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:8080
+    networks:
+      - microservices-net
+    depends_on:
+      eureka-server:
+        condition: service_healthy

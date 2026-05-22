@@ -12,7 +12,8 @@
       "PowerShell(dotnet restore \"h:\\\\nextjs\\\\demo projects\\\\backend \\(.net used with into nextjs\\) - separated\\\\nextjs-backend\\\\nextjs-backend-cust-service\\\\nextjs-backend-cust-service.csproj\" 2>&1)",
       "PowerShell(dotnet restore \"h:\\\\nextjs\\\\demo projects\\\\backend \\(.net used with into nextjs\\) - separated\\\\nextjs-backend\\\\nextjs-backend-dashboard-service\\\\nextjs-backend-dashboard-service.csproj\" 2>&1)",
       "PowerShell(dotnet build \"h:\\\\nextjs\\\\demo projects\\\\backend \\(.net used with into nextjs\\) - separated\\\\nextjs-backend\\\\nextjs-backend-cust-service\\\\nextjs-backend-cust-service.csproj\" 2>&1)",
-      "PowerShell(dotnet build \"h:\\\\nextjs\\\\demo projects\\\\backend \\(.net used with into nextjs\\) - separated\\\\nextjs-backend\\\\nextjs-backend-dashboard-service\\\\nextjs-backend-dashboard-service.csproj\" 2>&1)"
+      "PowerShell(dotnet build \"h:\\\\nextjs\\\\demo projects\\\\backend \\(.net used with into nextjs\\) - separated\\\\nextjs-backend\\\\nextjs-backend-dashboard-service\\\\nextjs-backend-dashboard-service.csproj\" 2>&1)",
+      "PowerShell(Get-ChildItem -Path \"h:\\\\nextjs\\\\demo projects\\\\backend \\(.net used with into nextjs\\) - separated\\\\nextjs-backend\" -Recurse | Where-Object {$_.PSIsContainer} | Select-Object Name)"
     ]
   }
 }
