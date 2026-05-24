@@ -1,0 +1,22 @@
+<h2>Invoice edit {{ ID }}</h2>
+
+
+
+<form class="example-form" [formGroup]="invoiceForm" (ngSubmit)="onSubmit(invoiceForm)">
+    <label for="fname">Name:</label><br>
+
+    <input type="text" pInputText id="fname" name="name" required formControlName="name" /><br>
+
+    <label for="lname">Amount:</label><br>
+
+    <input type="text" pInputText id="lname" name="amount" required formControlName="amount" />
+
+    <br>
+    <label for="lname">Status:</label><br>
+
+    <p-dropdown [options]="Status" formControlName="status" optionLabel="name" placeholder="Select a status" />
+    <br>
+
+    <button type="submit" pButton class="p-button-success"> Submit</button>
+    <!-- <button pButton pRipple (click)="search()" label="Search" class="p-button-success"></button> -->
+</form>

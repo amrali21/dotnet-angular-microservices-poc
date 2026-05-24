@@ -1,0 +1,21 @@
+<section class="bg-primary min-h-screen	border-round-right mr-2">
+    <div id="title" class="text-3xl p-3 text-white font-semibold">
+        CRD APP 4
+    </div>
+    <div class="text-lg">
+        <div role="listitem">
+            <p-button label="Home" [text]="true" icon="pi pi-check" styleClass="text-white" class="w-full"
+                (onClick)="route('/')" />
+
+        </div>
+        <div role="listitem">
+            <p-button label="Invoices" [text]="true" icon="pi pi-check" class="w-full" styleClass="text-white"
+                (onClick)="route('invoices')" />
+
+        </div>
+        <div role="listitem">
+            <p-button label="Customer" [text]="true" icon="pi pi-check" styleClass="text-white"
+                (onClick)="route('customers')" />
+        </div>
+    </div>
+</section>
