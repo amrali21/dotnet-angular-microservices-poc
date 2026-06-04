@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: invoice-service
+  namespace: microservices
+  labels:
+    app: invoice-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: invoice-service
+  template:
+    metadata:
+      labels:
+        app: invoice-service
+    spec:
+      containers:
+        - name: invoice-service
+          image: invoice-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5052
+          env:
+            - name: ASPNETCORE_URLS
+              value: "http://+:5052"
+          envFrom:
+            - configMapRef:
+                name: dotnet-common-config
+            - secretRef:
+                name: db-secret
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "192Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          # TCP probes make NO assumption about a /health endpoint existing.
+          readinessProbe:
+            tcpSocket:
+              port: 5052
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 5052
+            initialDelaySeconds: 20
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: invoice-service
+  namespace: microservices
+  labels:
+    app: invoice-service
+spec:
+  type: ClusterIP          # internal only — reachable as http://invoice-service:5052
+  selector:
+    app: invoice-service
+  ports:
+    - port: 5052
+      targetPort: 5052

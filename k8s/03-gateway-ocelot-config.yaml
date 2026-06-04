@@ -1,0 +1,56 @@
+# ----------------------------------------------------------------------------
+# Ocelot routing for Kubernetes — the Eureka-free version.
+#
+# The image's baked-in ocelot.json uses  "ServiceDiscoveryProvider": Eureka
+# and routes by ServiceName. Here we drop discovery entirely and route straight
+# to the Kubernetes Services by DNS name + port. Kubernetes' ClusterIP already
+# load-balances across the pods behind each Service, so we still get round-robin
+# across replicas without Eureka.
+#
+# This ConfigMap is mounted OVER /app/ocelot.json in the api-gateway container,
+# so no rebuild of the gateway image is required to change Eureka -> direct DNS.
+# ----------------------------------------------------------------------------
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-ocelot-config
+  namespace: microservices
+data:
+  ocelot.json: |
+    {
+      "Routes": [
+        {
+          "UpstreamPathTemplate": "/InvoiceGW/{everything}",
+          "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+          "DownstreamPathTemplate": "/{everything}",
+          "DownstreamScheme": "http",
+          "DownstreamHostAndPorts": [
+            { "Host": "invoice-service", "Port": 5052 }
+          ],
+          "LoadBalancerOptions": { "Type": "RoundRobin" }
+        },
+        {
+          "UpstreamPathTemplate": "/CustomerGW/{everything}",
+          "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+          "DownstreamPathTemplate": "/{everything}",
+          "DownstreamScheme": "http",
+          "DownstreamHostAndPorts": [
+            { "Host": "cust-service", "Port": 5246 }
+          ],
+          "LoadBalancerOptions": { "Type": "RoundRobin" }
+        },
+        {
+          "UpstreamPathTemplate": "/Dashboard/{everything}",
+          "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+          "DownstreamPathTemplate": "/{everything}",
+          "DownstreamScheme": "http",
+          "DownstreamHostAndPorts": [
+            { "Host": "dashboard-service", "Port": 5208 }
+          ],
+          "LoadBalancerOptions": { "Type": "RoundRobin" }
+        }
+      ],
+      "GlobalConfiguration": {
+        "HttpVersion": "1.1"
+      }
+    }

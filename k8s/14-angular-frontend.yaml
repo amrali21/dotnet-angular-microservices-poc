@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: angular-frontend
+  namespace: microservices
+  labels:
+    app: angular-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: angular-frontend
+  template:
+    metadata:
+      labels:
+        app: angular-frontend
+    spec:
+      containers:
+        - name: angular-frontend
+          # IMPORTANT: build this image with the "kubernetes" Angular config so
+          # ACTION_URL is relative ('') and the browser calls the API on the SAME
+          # Ingress host (no CORS, no hard-coded localhost:8080). See k8s/README.md.
+          image: angular-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: angular-frontend
+  namespace: microservices
+  labels:
+    app: angular-frontend
+spec:
+  type: ClusterIP          # internal — served to users through the Ingress
+  selector:
+    app: angular-frontend
+  ports:
+    - port: 80
+      targetPort: 80

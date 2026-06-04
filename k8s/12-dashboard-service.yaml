@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard-service
+  namespace: microservices
+  labels:
+    app: dashboard-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: dashboard-service
+  template:
+    metadata:
+      labels:
+        app: dashboard-service
+    spec:
+      containers:
+        - name: dashboard-service
+          image: dashboard-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5208
+          env:
+            - name: ASPNETCORE_URLS
+              value: "http://+:5208"
+          envFrom:
+            - configMapRef:
+                name: dotnet-common-config
+            - secretRef:
+                name: db-secret
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "192Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            tcpSocket:
+              port: 5208
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 5208
+            initialDelaySeconds: 20
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard-service
+  namespace: microservices
+  labels:
+    app: dashboard-service
+spec:
+  type: ClusterIP          # internal only — reachable as http://dashboard-service:5208
+  selector:
+    app: dashboard-service
+  ports:
+    - port: 5208
+      targetPort: 5208

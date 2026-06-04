@@ -1,0 +1,60 @@
+# ----------------------------------------------------------------------------
+# The single public entry point (replaces publishing 6 ports in docker-compose).
+#
+# Everything comes in on ONE host. The Ingress routes by URL path:
+#   /InvoiceGW/*  -> api-gateway -> invoice-service
+#   /CustomerGW/* -> api-gateway -> cust-service
+#   /Dashboard/*  -> api-gateway -> dashboard-service
+#   /             -> angular-frontend (the SPA + its assets)
+#
+# Because the SPA and the API share this host, the browser calls the API on the
+# same origin (ACTION_URL='') -> no CORS, nothing else is publicly exposed.
+#
+# Requires an ingress controller in the cluster (e.g. ingress-nginx):
+#   minikube addons enable ingress
+# For local testing, map the host to the cluster IP in your hosts file, e.g.:
+#   <minikube ip>   myapp.local
+# In the cloud, this host is a real DNS record pointing at the ingress
+# controller's external load-balancer (see k8s/README.md).
+# ----------------------------------------------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: microservices-ingress
+  namespace: microservices
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: myapp.local
+      http:
+        paths:
+          - path: /InvoiceGW
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 8080
+          - path: /CustomerGW
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 8080
+          - path: /Dashboard
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: angular-frontend
+                port:
+                  number: 80

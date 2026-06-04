@@ -363,3 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 CLAUDE.md
 .claude
+# Kubernetes secret with real credentials — keep local, use 01-db-secret.example.yaml as template
+k8s/01-db-secret.yaml

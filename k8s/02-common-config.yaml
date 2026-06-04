@@ -1,0 +1,21 @@
+# ----------------------------------------------------------------------------
+# Shared configuration for all .NET services AND the gateway.
+#
+# Two jobs:
+#  1. ASPNETCORE_ENVIRONMENT=Production -> the apps load appsettings.json only
+#     (NOT appsettings.Docker.json, which still has host.docker.internal).
+#  2. Turn OFF Steeltoe/Ocelot Eureka. We dropped the eureka-server entirely and
+#     use Kubernetes DNS for discovery, so the Eureka client must not try to
+#     register or fetch. These flags do that with NO code changes.
+#     (.NET maps the double-underscore env keys to eureka:client:* config.)
+# ----------------------------------------------------------------------------
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dotnet-common-config
+  namespace: microservices
+data:
+  ASPNETCORE_ENVIRONMENT: "Production"
+  eureka__client__enabled: "false"
+  eureka__client__shouldRegisterWithEureka: "false"
+  eureka__client__shouldFetchRegistry: "false"

@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cust-service
+  namespace: microservices
+  labels:
+    app: cust-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cust-service
+  template:
+    metadata:
+      labels:
+        app: cust-service
+    spec:
+      containers:
+        - name: cust-service
+          image: cust-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5246
+          env:
+            - name: ASPNETCORE_URLS
+              value: "http://+:5246"
+          envFrom:
+            - configMapRef:
+                name: dotnet-common-config
+            - secretRef:
+                name: db-secret
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "192Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            tcpSocket:
+              port: 5246
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 5246
+            initialDelaySeconds: 20
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cust-service
+  namespace: microservices
+  labels:
+    app: cust-service
+spec:
+  type: ClusterIP          # internal only — reachable as http://cust-service:5246
+  selector:
+    app: cust-service
+  ports:
+    - port: 5246
+      targetPort: 5246

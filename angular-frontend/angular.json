@@ -61,6 +61,15 @@
               ],
               "outputHashing": "all"
             },
+            "kubernetes": {
+              "fileReplacements": [
+                {
+                  "replace": "src/app/app.settings.ts",
+                  "with": "src/app/app.settings.kubernetes.ts"
+                }
+              ],
+              "outputHashing": "all"
+            },
             "development": {
               "optimization": false,
               "extractLicenses": false,

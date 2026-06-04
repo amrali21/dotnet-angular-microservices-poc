@@ -1,0 +1,19 @@
+# Apply everything in one shot:   kubectl apply -k k8s/
+# Tear it all down:               kubectl delete -k k8s/
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: microservices
+
+resources:
+  - 00-namespace.yaml
+  - 01-db-secret.yaml
+  - 02-common-config.yaml
+  - 03-gateway-ocelot-config.yaml
+  - 10-invoice-service.yaml
+  - 11-cust-service.yaml
+  - 12-dashboard-service.yaml
+  - 13-api-gateway.yaml
+  - 14-angular-frontend.yaml
+  - 20-ingress.yaml
+  - 30-hpa.yaml
