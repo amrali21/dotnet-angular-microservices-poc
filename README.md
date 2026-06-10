@@ -29,7 +29,7 @@ All three .NET services share a SQL Server database (`nextjs-test`).
 
 ## Running the project
 
-You can run the stack in three modes.
+You can run the stack in three modes. (the DB is on the host pc in all 3 modes)
 
 ### 1. Local (dotnet + Eureka)
 
