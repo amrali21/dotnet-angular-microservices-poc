@@ -50,6 +50,27 @@ A SQL Server reachable from the cluster (managed instance, VM, or host reachable
 by IP:port). A named instance like `HOST\SQLEXPRESS` generally is **not**
 reachable from a pod — use `Data Source=<host>,1433;...`.
 
+**SQL Server TCP/IP must be enabled** (it is off by default on SQL Server Express):
+1. Open **SQL Server Configuration Manager**
+2. SQL Server Network Configuration → Protocols for SQLEXPRESS → enable **TCP/IP**
+3. TCP/IP Properties → IP Addresses tab → IPAll → set **TCP Port = 1433**, clear **TCP Dynamic Ports**
+4. Restart the **SQL Server (SQLEXPRESS)** service
+5. Allow port 1433 through Windows Firewall:
+   ```powershell
+   New-NetFirewallRule -DisplayName "SQL Server 1433" -Direction Inbound -Protocol TCP -LocalPort 1433 -Action Allow
+   ```
+
+**CoreDNS must be patched** so pods can resolve `host.minikube.internal` (Minikube adds
+this hostname to the node's `/etc/hosts`, but pods use CoreDNS which doesn't see that file):
+```bash
+kubectl apply -f k8s/coredns-patch.yaml
+kubectl rollout restart deployment coredns -n kube-system
+```
+`coredns-patch.yaml` hardcodes `192.168.65.254` — verify this matches your setup with:
+```bash
+minikube ssh "grep host.minikube.internal /etc/hosts"
+```
+
 ---
 
 ## 1. Build the images
@@ -101,6 +122,7 @@ kubectl get pods -n microservices -w      # wait until all are Running/Ready
 # map the Ingress host to the cluster
 echo "$(minikube ip)  myapp.local" | sudo tee -a /etc/hosts
 #   Windows: add "<minikube ip>  myapp.local" to C:\Windows\System32\drivers\etc\hosts
+#   (open Notepad as Administrator to edit the hosts file)
 ```
 
 Open <http://myapp.local/> — the SPA loads, and its API calls go to
