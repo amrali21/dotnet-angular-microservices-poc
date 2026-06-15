@@ -1,0 +1,18 @@
+# Overlay used ONLY when building images destined for Kubernetes / the cloud.
+# It is NOT auto-loaded by compose — you must pass it explicitly with -f:
+#
+#   $env:TAG = "v1"
+#   docker compose -f docker-compose.yml -f docker-compose.push.yml build
+#   docker compose -f docker-compose.yml -f docker-compose.push.yml push
+#
+# Why it exists: the only difference between the local image and the cloud image
+# is the Angular build config. The base docker-compose.yml bakes NG_CONFIG=docker
+# (ACTION_URL=http://localhost:8080, for `docker compose up` on your laptop).
+# This overlay flips the frontend to NG_CONFIG=kubernetes (ACTION_URL='' ->
+# relative, same-origin API calls through the Ingress). Everything else (image
+# names, TAG) is inherited from docker-compose.yml.
+services:
+  angular-frontend:
+    build:
+      args:
+        NG_CONFIG: kubernetes

@@ -17,3 +17,24 @@ resources:
   - 14-angular-frontend.yaml
   - 20-ingress.yaml
   - 30-hpa.yaml
+
+# Rewrites the bare `image:` names in the Deployments to the Docker Hub registry
+# at apply time — the Deployment YAMLs stay registry-agnostic. Bump `newTag` here
+# to match the TAG you built/pushed with docker-compose, then `kubectl apply -k k8s/`.
+# (eureka-server is intentionally absent — k8s uses K8s-native discovery, not Eureka.)
+images:
+  - name: invoice-service
+    newName: xamrxxx/invoice-service
+    newTag: "v2"
+  - name: cust-service
+    newName: xamrxxx/cust-service
+    newTag: "v2"
+  - name: dashboard-service
+    newName: xamrxxx/dashboard-service
+    newTag: "v2"
+  - name: api-gateway
+    newName: xamrxxx/api-gateway
+    newTag: "v2"
+  - name: angular-frontend
+    newName: xamrxxx/angular-frontend
+    newTag: "v2"

@@ -75,25 +75,27 @@ minikube ssh "grep host.minikube.internal /etc/hosts"
 
 ## 1. Build the images
 
-The manifests use `imagePullPolicy: IfNotPresent` with local tags, so build the
-images **into minikube's Docker** (or push them to a registry the cluster can pull):
+Images are named for **Docker Hub** (`xamrxxx/<service>`) in `docker-compose.yml`.
+Compose builds and tags all of them in one shot — the push overlay flips the
+frontend to the kubernetes Angular config (`ACTION_URL=''` -> relative, same-origin
+API), so you don't build it separately:
 
 ```bash
 # point your shell at minikube's docker daemon (so images land where the cluster sees them)
 eval $(minikube docker-env)          # PowerShell: & minikube -p minikube docker-env | Invoke-Expression
 
-# from the repo root:
-docker build -t invoice-service:latest    ./nextjs-backend-invoice-service
-docker build -t cust-service:latest       ./nextjs-backend-cust-service
-docker build -t dashboard-service:latest  ./nextjs-backend-dashboard-service
-docker build -t api-gateway:latest        ./next-api-gateway
-
-# frontend: bake the kubernetes config (ACTION_URL='' -> relative, same-origin API)
-docker build --build-arg NG_CONFIG=kubernetes -t angular-frontend:latest ./angular-frontend
+# from the repo root — builds & tags every service at once:
+docker compose -f docker-compose.yml -f docker-compose.push.yml build
 ```
 
 > If you don't use `minikube docker-env`, build normally and load each image:
-> `minikube image load invoice-service:latest` (repeat per image).
+> ```bash
+> minikube image load xamrxxx/invoice-service:latest
+> minikube image load xamrxxx/cust-service:latest
+> minikube image load xamrxxx/dashboard-service:latest
+> minikube image load xamrxxx/api-gateway:latest
+> minikube image load xamrxxx/angular-frontend:latest
+> ```
 
 ## 2. Set the database secret
 
@@ -153,8 +155,22 @@ kubectl delete -k k8s/
   fresh tag per build (`angular-frontend:k8s-2`) so the rollout actually pulls it.
 
 ## Going to the cloud (EKS/AKS/GKE)
-1. Push images to a registry (ECR/ACR/GCR/Docker Hub) and change the `image:`
-   fields to the registry paths (drop `imagePullPolicy: IfNotPresent`).
+1. Push the images to Docker Hub so the cluster can pull them (`docker login` once).
+   **Use a new immutable tag per release** (`v1`, `v2`, a build number, or the git
+   short SHA) — never reuse a tag, because `imagePullPolicy: IfNotPresent` means a
+   node that cached an old `:v1` won't re-pull a changed `:v1`:
+   ```bash
+   $env:TAG = "v1"
+   docker compose -f docker-compose.yml -f docker-compose.push.yml build
+   docker compose -f docker-compose.yml -f docker-compose.push.yml push
+   ```
+   Then bump `newTag: "v1"` in the `images:` block of `kustomization.yaml` (it
+   already points at `xamrxxx/<service>`) to the same tag and `kubectl apply -k k8s/`.
+   The `TAG` you push with and the `newTag` you apply with must match — that one
+   value is your release version.
+
+   > The local image and the pushed image are the **same content** — a tag is just
+   > a pointer, so you build once, test locally, and push the identical bits.
 2. The ingress controller gets a real external load-balancer IP/hostname; create
    a DNS record (`A`/`CNAME`) for your domain pointing at it, and set that domain
    as the Ingress `host:`.

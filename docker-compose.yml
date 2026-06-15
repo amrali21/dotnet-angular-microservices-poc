@@ -6,6 +6,10 @@ services:
   eureka-server:
     build:
       context: ./eureka-server
+    # Registry-qualified name (Docker Hub) so `docker compose push` can publish it.
+    # NOTE: eureka is NOT used by the k8s deployment (k8s-native discovery) — it
+    # is pushed only for completeness of the compose stack.
+    image: xamrxxx/eureka-server:${TAG:-latest}
     container_name: eureka-server
     ports:
       - "8761:8761"
@@ -21,6 +25,7 @@ services:
   invoice-service:
     build:
       context: ./nextjs-backend-invoice-service
+    image: xamrxxx/invoice-service:${TAG:-latest}
     container_name: invoice-service
     ports:
       - "5052:5052"
@@ -39,6 +44,7 @@ services:
   cust-service:
     build:
       context: ./nextjs-backend-cust-service
+    image: xamrxxx/cust-service:${TAG:-latest}
     container_name: cust-service
     ports:
       - "5246:5246"
@@ -57,6 +63,7 @@ services:
   dashboard-service:
     build:
       context: ./nextjs-backend-dashboard-service
+    image: xamrxxx/dashboard-service:${TAG:-latest}
     container_name: dashboard-service
     ports:
       - "5208:5208"
@@ -75,6 +82,7 @@ services:
   api-gateway:
     build:
       context: ./next-api-gateway
+    image: xamrxxx/api-gateway:${TAG:-latest}
     container_name: api-gateway
     ports:
       - "8080:8080"
@@ -90,6 +98,10 @@ services:
   angular-frontend:
     build:
       context: ./angular-frontend
+    # Default build bakes the "docker" Angular config (ACTION_URL=http://localhost:8080).
+    # For the k8s/cloud image build with docker-compose.push.yml, which overrides
+    # the NG_CONFIG build-arg to "kubernetes" (ACTION_URL='' -> same-origin via Ingress).
+    image: xamrxxx/angular-frontend:${TAG:-latest}
     container_name: angular-frontend
     ports:
       - "4200:80"
