@@ -368,3 +368,4 @@ k8s/01-db-secret.yaml
 
 #questions.txt is a file that contains questions for the project. It is not necessary for the project to function, and it may contain sensitive information. Therefore, it should be ignored by Git.
 questions.txt
+next.txt
