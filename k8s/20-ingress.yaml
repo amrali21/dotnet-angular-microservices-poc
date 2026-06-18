@@ -27,8 +27,8 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: myapp.local
-      http:
+#    - host: myapp.local
+    - http:
         paths:
           - path: /InvoiceGW
             pathType: Prefix

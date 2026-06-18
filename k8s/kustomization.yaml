@@ -38,3 +38,14 @@ images:
   - name: angular-frontend
     newName: xamrxxx/angular-frontend
     newTag: "v2"
+
+# following block is used to test whether kubernetes would pull the latest image from the registry instead of using a cached image. 
+# a better solution is to delete images in minikube and then run `kubectl apply -k k8s/` again.
+
+# patches:
+#   - patch: |-
+#       - op: replace
+#         path: /spec/template/spec/containers/0/imagePullPolicy
+#         value: Always
+#     target:
+#       kind: Deployment
