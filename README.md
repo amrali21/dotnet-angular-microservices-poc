@@ -87,6 +87,9 @@ important entry point is **`/`**, which points to the Angular frontend (the
 ```bash
 kubectl apply -k k8s/
 
+#check this
+notes: make sure db secret points to local db on host. not aks cloud db.
+
 # route local traffic to the ingress controller (instead of using `minikube tunnel`)
 kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8090:80
 ```
