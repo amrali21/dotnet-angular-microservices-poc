@@ -1,24 +1,108 @@
-<div class="card flex  m-2 ml-0">
-    <input type="text" pInputText [(ngModel)]="query" />
-    <button pButton pRipple (click)="search()" label="Search" class="p-button-success ml-3"></button>
-</div>
-<div class="card">
-    <p-table [value]="customerList" [tableStyle]="{ 'min-width': '50rem' }" styleClass="p-datatable-gridlines"
-        [paginator]="true" [rows]="filter.pageSize" [first]="filter.pageSize * filter.pageIndex"
-        [totalRecords]="customerListLength" lazy="true" (onPage)="onPage($event)" [rowsPerPageOptions]="[5, 10, 20]">
-        <ng-template pTemplate="header">
-            <tr>
-                <th>Code</th>
-                <th>Name</th>
-                <th>Image</th>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-product>
-            <tr>
-                <td>{{ product.name }}</td>
-                <td>{{ product.email }}</td>
-                <td>{{ product.image_url }}</td>
-            </tr>
-        </ng-template>
+<div class="page">
+
+  <header class="page-head">
+    <div>
+      <h1 class="page-head__title">Customers</h1>
+      <p class="page-head__sub">
+        {{ customerListLength }} account{{ customerListLength === 1 ? '' : 's' }} on file.
+      </p>
+    </div>
+    <div class="page-head__tools">
+      <span class="service-chip">cust-service</span>
+    </div>
+  </header>
+
+  @if (error()) {
+  <div class="banner banner--error" role="alert">
+    <i class="pi pi-exclamation-triangle"></i>
+    <div>
+      <strong>Customers unavailable</strong>
+      <p>{{ error() }}</p>
+    </div>
+    <button type="button" class="btn btn--ghost" (click)="search()">Retry</button>
+  </div>
+  }
+
+  <section class="surface-card">
+    <div class="card-head">
+      <form class="search" (ngSubmit)="search()">
+        <span class="p-input-icon-left search__field">
+          <i class="pi pi-search"></i>
+          <input type="search" pInputText [(ngModel)]="query" name="query" placeholder="Search by name"
+            aria-label="Search customers" />
+        </span>
+        <button type="submit" class="btn btn--primary">Search</button>
+        @if (query) {
+        <button type="button" class="btn btn--ghost" (click)="clear()">Clear</button>
+        }
+      </form>
+
+      @if (loading()) {
+      <span class="muted"><i class="pi pi-spin pi-spinner"></i> Loading…</span>
+      }
+    </div>
+
+    <p-table [value]="customerList" [paginator]="true" [rows]="filter.pageSize"
+      [first]="filter.pageSize * filter.pageIndex" [totalRecords]="customerListLength" [lazy]="true"
+      (onPage)="onPage($event)" [rowsPerPageOptions]="[5, 10, 20]"
+      currentPageReportTemplate="{first}–{last} of {totalRecords}"
+      [showCurrentPageReport]="true"
+      paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+      [tableStyle]="{ 'min-width': '42rem' }">
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Customer</th>
+          <th>Email</th>
+          <th style="width:14rem">Account ID</th>
+          <th style="width:4rem"></th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-customer>
+        <tr>
+          <td>
+            <div class="who">
+              <span class="avatar" [style.background]="colorFor(customer.name)">{{ initialsOf(customer.name) }}</span>
+              <span class="who__text"><strong>{{ customer.name }}</strong></span>
+            </div>
+          </td>
+          <td>
+            <a [href]="'mailto:' + customer.email">{{ customer.email }}</a>
+          </td>
+          <td><span class="mono muted">{{ shortId(customer.id) }}</span></td>
+          <td>
+            <div class="row-actions">
+              <a class="btn btn--icon" [routerLink]="[customer.id]" pTooltip="View customer" tooltipPosition="top"
+                [attr.aria-label]="'View ' + customer.name">
+                <i class="pi pi-arrow-up-right"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="4">
+            @if (loading()) {
+            <div class="state"><i class="pi pi-spin pi-spinner"></i><strong>Loading customers…</strong></div>
+            } @else if (query) {
+            <div class="state">
+              <i class="pi pi-search"></i>
+              <strong>No customers match “{{ query }}”</strong>
+              <span>cust-service matches on the start of the name.</span>
+            </div>
+            } @else {
+            <div class="state">
+              <i class="pi pi-users"></i>
+              <strong>No customers yet</strong>
+              <span>Seed the database to populate this list.</span>
+            </div>
+            }
+          </td>
+        </tr>
+      </ng-template>
     </p-table>
+  </section>
 </div>

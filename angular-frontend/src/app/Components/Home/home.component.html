@@ -1,58 +1,208 @@
-<div class="p-4">
-  <h1 class="text-2xl font-semibold mb-4">Dashboard</h1>
+<div class="page">
 
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-      <p class="text-sm text-gray-500">Invoices</p>
-      <p class="text-2xl font-semibold">{{ cardData()?.invoiceCount ?? 0 }}</p>
+  <header class="page-head">
+    <div>
+      <h1 class="page-head__title">Overview</h1>
+      <p class="page-head__sub">Billing health across every customer account.</p>
     </div>
+    <div class="page-head__tools">
+      <span class="service-chip">dashboard-service</span>
+      <button type="button" class="btn btn--ghost" (click)="refresh()" [disabled]="loading()">
+        <i class="pi pi-refresh" [class.spin]="loading()"></i>
+        Refresh
+      </button>
+    </div>
+  </header>
 
-    <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-      <p class="text-sm text-gray-500">Customers</p>
-      <p class="text-2xl font-semibold">{{ cardData()?.customerCount ?? 0 }}</p>
+  @if (error()) {
+  <div class="banner banner--error" role="alert">
+    <i class="pi pi-exclamation-triangle"></i>
+    <div>
+      <strong>Dashboard data unavailable</strong>
+      <p>{{ error() }}</p>
     </div>
-
-    <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-      <p class="text-sm text-gray-500">Paid</p>
-      <p class="text-2xl font-semibold text-green-600">
-        {{ formatCurrency(cardData()?.invoiceStatus?.paid) }}
-      </p>
-    </div>
-
-    <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-      <p class="text-sm text-gray-500">Pending</p>
-      <p class="text-2xl font-semibold text-amber-600">
-        {{ formatCurrency(cardData()?.invoiceStatus?.pending) }}
-      </p>
-    </div>
+    <button type="button" class="btn btn--ghost" (click)="refresh()">Retry</button>
   </div>
+  }
 
-  <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-    <div class="flex items-center justify-between mb-3">
-      <h2 class="text-lg font-semibold">Monthly Revenue</h2>
-      <span class="text-sm text-gray-500">
-        Total: {{ formatCurrency(totalRevenue()) }}
-      </span>
-    </div>
+  <!-- KPI tiles ------------------------------------------------------------ -->
+  <section class="tiles" aria-label="Key figures">
+    @if (loading() && !cardData()) {
+    @for (placeholder of [1, 2, 3, 4]; track placeholder) {
+    <article class="surface-card tile">
+      <div class="skeleton" style="height:.75rem;width:45%"></div>
+      <div class="skeleton" style="height:1.75rem;width:65%;margin-top:.85rem"></div>
+      <div class="skeleton" style="height:.7rem;width:35%;margin-top:.75rem"></div>
+    </article>
+    }
+    } @else {
+    <article class="surface-card tile">
+      <p class="tile__label"><i class="pi pi-wallet"></i> Total billed</p>
+      <p class="tile__value tabular">{{ money(billedCents()) }}</p>
+      <p class="tile__foot">{{ cardData()?.invoiceCount ?? 0 }} invoices · avg {{ money(averageInvoiceCents()) }}</p>
+    </article>
 
-    <p-table [value]="revenue()" [tableStyle]="{ 'min-width': '20rem' }">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>Month</th>
-          <th class="text-right">Revenue</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-row>
-        <tr>
-          <td>{{ row.month }}</td>
-          <td class="text-right">{{ formatCurrency(row.revenue) }}</td>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="2" class="text-center text-gray-500 py-4">No revenue data.</td>
-        </tr>
-      </ng-template>
-    </p-table>
+    <article class="surface-card tile">
+      <p class="tile__label"><i class="pi pi-check-circle"></i> Collected</p>
+      <p class="tile__value tabular">{{ money(paidCents()) }}</p>
+      <p class="tile__foot">
+        <span class="status-badge status-badge--paid"><i class="pi pi-check"></i> paid</span>
+        {{ collectedShare() }}% of billed value
+      </p>
+    </article>
+
+    <article class="surface-card tile">
+      <p class="tile__label"><i class="pi pi-clock"></i> Outstanding</p>
+      <p class="tile__value tabular">{{ money(pendingCents()) }}</p>
+      <p class="tile__foot">
+        <span class="status-badge status-badge--pending"><i class="pi pi-hourglass"></i> pending</span>
+        awaiting payment
+      </p>
+    </article>
+
+    <article class="surface-card tile">
+      <p class="tile__label"><i class="pi pi-users"></i> Customers</p>
+      <p class="tile__value tabular">{{ cardData()?.customerCount ?? 0 }}</p>
+      <p class="tile__foot"><a routerLink="/customers">Manage customers <i class="pi pi-arrow-right"></i></a></p>
+    </article>
+    }
+  </section>
+
+  <div class="dash-grid">
+
+    <!-- Revenue chart ------------------------------------------------------ -->
+    <section class="surface-card">
+      <div class="card-head">
+        <div>
+          <h2>Monthly revenue</h2>
+          <p class="card-head__sub">Recognised revenue by month · {{ dollars(totalRevenue()) }} total</p>
+        </div>
+        <div class="seg" role="group" aria-label="View as">
+          <button type="button" [class.seg__btn--on]="!tableView()" class="seg__btn" (click)="tableView.set(false)">
+            <i class="pi pi-chart-bar"></i> Chart
+          </button>
+          <button type="button" [class.seg__btn--on]="tableView()" class="seg__btn" (click)="tableView.set(true)">
+            <i class="pi pi-table"></i> Table
+          </button>
+        </div>
+      </div>
+
+      <div class="card-body">
+        @if (loading() && revenue().length === 0) {
+        <div class="skeleton" style="height:240px"></div>
+        } @else if (revenue().length === 0) {
+        <div class="state">
+          <i class="pi pi-chart-bar"></i>
+          <strong>No revenue recorded</strong>
+          <span>Once the revenue table is seeded, monthly totals show up here.</span>
+        </div>
+        } @else if (tableView()) {
+        <table class="plain-table">
+          <caption class="sr-only">Monthly revenue</caption>
+          <thead>
+            <tr>
+              <th scope="col">Month</th>
+              <th scope="col" class="right">Revenue</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of revenue(); track row.month) {
+            <tr>
+              <th scope="row">{{ row.month }}</th>
+              <td class="right tabular">{{ dollars(row.revenue) }}</td>
+            </tr>
+            }
+          </tbody>
+        </table>
+        } @else {
+        <div class="chart" (mouseleave)="hovered.set(null)">
+          <svg [attr.viewBox]="'0 0 ' + view.w + ' ' + view.h" class="chart__svg" role="img"
+            aria-label="Bar chart of revenue by month">
+
+            <!-- Gridlines + value axis -->
+            @for (tick of ticks(); track tick.y) {
+            <line class="chart__grid" [attr.x1]="view.left" [attr.x2]="view.right" [attr.y1]="tick.y"
+              [attr.y2]="tick.y" />
+            <text class="chart__tick" [attr.x]="view.left - 10" [attr.y]="tick.y + 4" text-anchor="end">
+              {{ dollars(tick.value) }}
+            </text>
+            }
+            <line class="chart__axis" [attr.x1]="view.left" [attr.x2]="view.right" [attr.y1]="view.baseline"
+              [attr.y2]="view.baseline" />
+
+            @for (bar of bars(); track bar.month; let i = $index) {
+            <g class="chart__bar" [class.chart__bar--dim]="hovered() !== null && hovered() !== i"
+              (mouseenter)="hovered.set(i)" (focus)="hovered.set(i)" (blur)="hovered.set(null)" tabindex="0"
+              role="graphics-symbol" [attr.aria-label]="bar.month + ': ' + dollars(bar.revenue)">
+              <!-- Hit target spans the full plot height, not just the mark -->
+              <rect class="chart__hit" [attr.x]="bar.x - 8" [attr.y]="18" [attr.width]="bar.width + 16"
+                [attr.height]="view.baseline - 18" />
+              <path class="chart__mark" [attr.d]="bar.path" />
+              <!-- Selective direct label: the peak month only -->
+              @if (bar.isMax) {
+              <text class="chart__peak" [attr.x]="bar.centre" [attr.y]="bar.y - 7" text-anchor="middle">
+                {{ dollars(bar.revenue) }}
+              </text>
+              }
+              <text class="chart__month" [attr.x]="bar.centre" [attr.y]="view.labelY" text-anchor="middle">
+                {{ bar.month }}
+              </text>
+            </g>
+            }
+          </svg>
+
+          @if (hoveredBar(); as bar) {
+          <div class="chart__tip" [ngStyle]="tooltipStyle()">
+            <strong>{{ bar.month }}</strong>
+            <span class="tabular">{{ dollars(bar.revenue) }}</span>
+          </div>
+          }
+        </div>
+        }
+      </div>
+    </section>
+
+    <!-- Collection status -------------------------------------------------- -->
+    <section class="surface-card">
+      <div class="card-head">
+        <div>
+          <h2>Collection status</h2>
+          <p class="card-head__sub">Share of billed value settled</p>
+        </div>
+      </div>
+
+      <div class="card-body">
+        @if (loading() && !cardData()) {
+        <div class="skeleton" style="height:2.5rem"></div>
+        <div class="skeleton" style="height:1rem;width:60%;margin-top:1rem"></div>
+        } @else {
+        <p class="meter__headline tabular">{{ collectedShare() }}%</p>
+        <p class="muted">of {{ money(billedCents()) }} billed has been collected</p>
+
+        <div class="meter" role="img"
+          [attr.aria-label]="collectedShare() + '% collected, ' + (100 - collectedShare()) + '% outstanding'">
+          <span class="meter__seg meter__seg--paid" [style.width.%]="collectedShare()"></span>
+          <span class="meter__seg meter__seg--pending" [style.width.%]="100 - collectedShare()"></span>
+        </div>
+
+        <ul class="legend">
+          <li>
+            <span class="legend__swatch legend__swatch--paid"></span>
+            <span class="legend__label"><i class="pi pi-check-circle"></i> Paid</span>
+            <span class="legend__value tabular">{{ money(paidCents()) }}</span>
+          </li>
+          <li>
+            <span class="legend__swatch legend__swatch--pending"></span>
+            <span class="legend__label"><i class="pi pi-hourglass"></i> Pending</span>
+            <span class="legend__value tabular">{{ money(pendingCents()) }}</span>
+          </li>
+        </ul>
+
+        <a class="btn btn--primary btn--block" routerLink="/invoices">
+          <i class="pi pi-file"></i> Review invoices
+        </a>
+        }
+      </div>
+    </section>
   </div>
 </div>

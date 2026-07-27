@@ -1,27 +1,59 @@
-# TestAngular
+# Ledgerly — billing console
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.6.
+The Angular SPA for this POC. It talks to the three .NET microservices through
+the Ocelot API gateway and never calls a service directly.
 
-## Development server
+| Screen | Route | Backing service |
+| --- | --- | --- |
+| Overview (KPIs + monthly revenue) | `/` | `dashboard-service` |
+| Invoices (list, edit, delete) | `/invoices`, `/invoices/:id` | `invoice-service` |
+| Customers (list, profile) | `/customers`, `/customers/:id` | `cust-service` |
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## Running it
 
-## Code scaffolding
+```bash
+npm install
+npm start          # http://localhost:4200
+npm test           # Karma + Jasmine
+npm run build      # production bundle -> dist/ledgerly/browser
+```
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+The gateway URL is a build-time constant, picked per configuration:
 
-## Build
+| Configuration | File | `ACTION_URL` |
+| --- | --- | --- |
+| default / `production` | `src/app/app.settings.ts` | `https://localhost:7019` |
+| `docker` | `src/app/app.settings.docker.ts` | the gateway's compose address |
+| `kubernetes` | `src/app/app.settings.kubernetes.ts` | `''` (same-origin, via Ingress) |
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+Changing it means a rebuild — see the notes in the repo-root `README.md`.
 
-## Running unit tests
+## UI conventions
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+- **Design tokens live in `src/styles.css`**, declared once per theme on
+  `<html data-theme="light|dark">`. Components are written against the tokens
+  (`--surface`, `--text-2`, `--status-good`, …), never against raw colours, so
+  the two themes stay in sync.
+- **Theme switching** is handled by `Services/Theme/theme.service.ts`. It flips
+  `data-theme` and swaps the PrimeNG Aura stylesheet, which is copied to
+  `/themes/aura-{light,dark}-indigo/` by the asset pipeline in `angular.json`.
+  `index.html` applies the stored choice before first paint to avoid a flash.
+- **Components come from PrimeNG 17** (Aura indigo) with PrimeFlex for layout.
+  Plain `.btn` / `.surface-card` / `.status-badge` primitives in `styles.css`
+  cover the cases where a full PrimeNG component would be overkill.
+- **The revenue chart is hand-rolled SVG** in `Components/Home`, so there is no
+  charting dependency. Geometry is computed in the component; the template only
+  renders it. It ships a table view, keyboard-focusable bars, and a single-hue
+  series validated for contrast in both themes.
+- **Money formatting is centralised** in `Shared/display.ts`. Invoice amounts
+  are stored in cents by the API and shown in dollars; the `revenue` table is
+  already in dollars. `formatCents` / `formatDollars` keep that explicit.
+- **Avatars are generated from initials.** The seed data's `image_url` values
+  point at assets that only exist in the original Next.js sample, so they are
+  never requested.
 
-## Running end-to-end tests
+## Known gaps
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- No auth service, so the user chip in the top bar is static.
+- `cust-service` has no fetch-by-id endpoint, so `/customers/:id` reads the
+  record from the loaded list and shows an explanatory state if opened directly.

@@ -1,21 +1,36 @@
-<section class="bg-primary min-h-screen	border-round-right mr-2">
-    <div id="title" class="text-3xl p-3 text-white font-semibold">
-        CRD APP 4
-    </div>
-    <div class="text-lg">
-        <div role="listitem">
-            <p-button label="Home" [text]="true" icon="pi pi-check" styleClass="text-white" class="w-full"
-                (onClick)="route('/')" />
+<nav class="nav" aria-label="Main">
 
-        </div>
-        <div role="listitem">
-            <p-button label="Invoices" [text]="true" icon="pi pi-check" class="w-full" styleClass="text-white"
-                (onClick)="route('invoices')" />
+  <a class="brand" routerLink="/" (click)="navigated.emit()">
+    <span class="brand__mark">L</span>
+    <span class="brand__text">
+      <strong>Ledgerly</strong>
+      <small>Billing console</small>
+    </span>
+  </a>
 
-        </div>
-        <div role="listitem">
-            <p-button label="Customer" [text]="true" icon="pi pi-check" styleClass="text-white"
-                (onClick)="route('customers')" />
-        </div>
-    </div>
-</section>
+  <p class="nav__label">Manage</p>
+  <ul class="nav__list">
+    @for (item of items; track item.route) {
+    <li>
+      <a class="nav__item" [routerLink]="item.route" routerLinkActive="nav__item--active"
+        [routerLinkActiveOptions]="{ exact: item.exact }" (click)="navigated.emit()">
+        <i class="pi" [ngClass]="item.icon"></i>
+        <span class="nav__item-label">{{ item.label }}</span>
+        <span class="nav__item-service">{{ item.service }}</span>
+      </a>
+    </li>
+    }
+  </ul>
+
+  <!-- Architecture footer: this is a microservices POC, so the topology is part
+       of what the UI is meant to show off. -->
+  <div class="nav__foot">
+    <p class="nav__label">Backing services</p>
+    <ul class="topology">
+      @for (service of services; track service) {
+      <li><span class="service-chip">{{ service }}</span></li>
+      }
+    </ul>
+    <p class="nav__version">v{{ version }} · .NET + Angular POC</p>
+  </div>
+</nav>

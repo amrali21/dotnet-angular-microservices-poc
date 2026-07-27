@@ -1,5 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
+import { catchError, finalize, forkJoin, of, tap } from 'rxjs';
 import { ACTION_URL } from '../../app.settings';
 import { KpiCardData, RevenuePoint } from '../Models/models';
 
@@ -13,19 +14,29 @@ export class KPIService {
   revenue = signal<RevenuePoint[]>([]);
   cardData = signal<KpiCardData | null>(null);
 
-  loadRevenue(): void {
-    const url = `${ACTION_URL}/Dashboard/KPI/getRevenue`;
-    const headers = new HttpHeaders().set('Accept', 'application/json');
-    this.http.get<RevenuePoint[]>(url, { headers }).subscribe(response => {
-      this.revenue.set(response);
-    });
-  }
+  /** Both dashboard calls load together so the page has one honest state. */
+  loading = signal<boolean>(false);
+  error = signal<string | null>(null);
 
-  loadCardData(): void {
-    const url = `${ACTION_URL}/Dashboard/KPI/getCardData`;
+  load(): void {
     const headers = new HttpHeaders().set('Accept', 'application/json');
-    this.http.get<KpiCardData>(url, { headers }).subscribe(response => {
-      this.cardData.set(response);
-    });
+
+    this.loading.set(true);
+    this.error.set(null);
+
+    forkJoin({
+      revenue: this.http.get<RevenuePoint[]>(`${ACTION_URL}/Dashboard/KPI/getRevenue`, { headers }),
+      cardData: this.http.get<KpiCardData>(`${ACTION_URL}/Dashboard/KPI/getCardData`, { headers }),
+    }).pipe(
+      tap(({ revenue, cardData }) => {
+        this.revenue.set(revenue ?? []);
+        this.cardData.set(cardData);
+      }),
+      catchError(() => {
+        this.error.set('Could not reach dashboard-service through the API gateway.');
+        return of(null);
+      }),
+      finalize(() => this.loading.set(false)),
+    ).subscribe();
   }
 }

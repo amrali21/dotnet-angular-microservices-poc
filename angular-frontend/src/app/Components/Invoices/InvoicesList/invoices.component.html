@@ -1,36 +1,130 @@
-<div class="card flex m-2 ml-0">
-    <input type="text" pInputText [(ngModel)]="query" />
-    <button pButton pRipple (click)="search()" label="Search" class="p-button-success ml-3"></button>
+<div class="page">
 
-</div>
-<div class="card">
-    <p-table [value]="invoicesList" styleClass="p-datatable-gridlines" [paginator]="true" [rows]="filter.pageSize"
-        [first]="filter.pageSize * filter.pageIndex" [totalRecords]="invoiceListLength" lazy="true"
-        (onPage)="onPage($event)" [rowsPerPageOptions]="[5, 10, 20]">
-        <ng-template pTemplate="header">
-            <tr>
-                <th>Id</th>
-                <th>Amount</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th></th>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-invoice>
-            <tr>
-                <td>{{ invoice.id }}</td>
-                <td>{{ invoice.amount }}</td>
-                <td>{{ invoice.name }}</td>
-                <td>{{ invoice.email}}</td>
-                <td>
-                    <p-button class="mr-5" label="Edit" [raised]="true" severity="secondary" routerLink="{{invoice.id}}"
-                        routerLinkActive="active" />
+  <header class="page-head">
+    <div>
+      <h1 class="page-head__title">Invoices</h1>
+      <p class="page-head__sub">
+        {{ invoiceListLength }} invoice{{ invoiceListLength === 1 ? '' : 's' }} across all accounts.
+      </p>
+    </div>
+    <div class="page-head__tools">
+      <span class="service-chip">invoice-service</span>
+    </div>
+  </header>
 
-                    <p-button label="Delete" [raised]="true" severity="danger" (click)="deleteInvoice(invoice.id)"
-                        routerLinkActive="active" />
+  @if (error()) {
+  <div class="banner banner--error" role="alert">
+    <i class="pi pi-exclamation-triangle"></i>
+    <div>
+      <strong>Invoices unavailable</strong>
+      <p>{{ error() }}</p>
+    </div>
+    <button type="button" class="btn btn--ghost" (click)="search()">Retry</button>
+  </div>
+  }
 
-                </td>
-            </tr>
-        </ng-template>
+  <section class="surface-card">
+    <div class="card-head">
+      <form class="search" (ngSubmit)="search()">
+        <span class="p-input-icon-left search__field">
+          <i class="pi pi-search"></i>
+          <input type="search" pInputText [(ngModel)]="query" name="query" placeholder="Search by customer or email"
+            aria-label="Search invoices" />
+        </span>
+        <button type="submit" class="btn btn--primary">Search</button>
+        @if (query) {
+        <button type="button" class="btn btn--ghost" (click)="clear()">Clear</button>
+        }
+      </form>
+
+      @if (loading()) {
+      <span class="muted"><i class="pi pi-spin pi-spinner"></i> Loading…</span>
+      }
+    </div>
+
+    <p-table [value]="invoicesList" [paginator]="true" [rows]="filter.pageSize"
+      [first]="filter.pageSize * filter.pageIndex" [totalRecords]="invoiceListLength" [lazy]="true"
+      (onPage)="onPage($event)" [rowsPerPageOptions]="[5, 10, 20]"
+      currentPageReportTemplate="{first}–{last} of {totalRecords}"
+      [showCurrentPageReport]="true"
+      paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+      [tableStyle]="{ 'min-width': '52rem' }">
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width:9rem">Invoice</th>
+          <th>Customer</th>
+          <th style="width:9rem">Issued</th>
+          <th style="width:8rem">Status</th>
+          <th class="right" style="width:8rem">Amount</th>
+          <th style="width:6.5rem"></th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-invoice>
+        <tr>
+          <td><span class="mono muted">#{{ invoice.id }}</span></td>
+
+          <td>
+            <div class="who">
+              <span class="avatar" [style.background]="colorFor(invoice.name)">{{ initialsOf(invoice.name) }}</span>
+              <span class="who__text">
+                <strong>{{ invoice.name }}</strong>
+                <small>{{ invoice.email }}</small>
+              </span>
+            </div>
+          </td>
+
+          <td class="muted">{{ date(invoice.date) }}</td>
+
+          <td>
+            <span class="status-badge" [ngClass]="'status-badge--' + (invoice.status || 'neutral')">
+              <i class="pi" [ngClass]="invoice.status === 'paid' ? 'pi-check' : 'pi-hourglass'"></i>
+              {{ invoice.status || 'unknown' }}
+            </span>
+          </td>
+
+          <td class="right"><strong class="tabular">{{ money(invoice.amount) }}</strong></td>
+
+          <td>
+            <div class="row-actions">
+              <a class="btn btn--icon" [routerLink]="[invoice.id]" pTooltip="Edit invoice" tooltipPosition="top"
+                [attr.aria-label]="'Edit invoice ' + invoice.id">
+                <i class="pi pi-pencil"></i>
+              </a>
+              <button type="button" class="btn btn--icon btn--danger" (click)="confirmDelete($event, invoice)"
+                pTooltip="Delete invoice" tooltipPosition="top"
+                [attr.aria-label]="'Delete invoice ' + invoice.id">
+                <i class="pi pi-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6">
+            @if (loading()) {
+            <div class="state"><i class="pi pi-spin pi-spinner"></i><strong>Loading invoices…</strong></div>
+            } @else if (query) {
+            <div class="state">
+              <i class="pi pi-search"></i>
+              <strong>No invoices match “{{ query }}”</strong>
+              <span>Try a different customer name or email address.</span>
+            </div>
+            } @else {
+            <div class="state">
+              <i class="pi pi-file"></i>
+              <strong>No invoices yet</strong>
+              <span>Invoices created against a customer will appear here.</span>
+            </div>
+            }
+          </td>
+        </tr>
+      </ng-template>
     </p-table>
+  </section>
 </div>
+
+<p-confirmPopup />

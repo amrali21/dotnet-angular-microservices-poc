@@ -1,9 +1,153 @@
-.example-container {
-    width: auto;
-    height: 200px;
-    margin: 10px;
-    border: 1px solid #555;
-    /* The background property is added to clearly distinguish the borders between drawer and main
-       content */
-    background: #eee;
+:host {
+    display: block;
+    height: 100%;
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1rem .75rem 1.25rem;
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+}
+
+/* --- Brand ---------------------------------------------------------------- */
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .4rem .5rem 1.1rem;
+    color: inherit;
+}
+
+.brand__mark {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #6366f1, #4338ca);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    box-shadow: 0 4px 12px -4px rgba(79, 70, 229, .6);
+}
+
+.brand__text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.brand__text strong {
+    color: var(--text);
+    font-size: .975rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+}
+
+.brand__text small {
+    color: var(--text-muted);
+    font-size: .6875rem;
+}
+
+/* --- Items ---------------------------------------------------------------- */
+
+.nav__label {
+    padding: 0 .6rem;
+    margin-bottom: .4rem;
+    color: var(--text-muted);
+    font-size: .6875rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.nav__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.nav__item {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .55rem .6rem;
+    border-radius: 10px;
+    color: var(--text-2);
+    font-size: .875rem;
+    font-weight: 500;
+    transition: background-color .15s ease, color .15s ease;
+}
+
+.nav__item i {
+    font-size: .875rem;
+    width: 1rem;
+    text-align: center;
+    color: var(--text-muted);
+    transition: color .15s ease;
+}
+
+.nav__item:hover {
+    background: var(--surface-3);
+    color: var(--text);
+}
+
+.nav__item--active {
+    background: var(--sidebar-active-bg);
+    color: var(--sidebar-active-text);
+    font-weight: 600;
+}
+
+.nav__item--active i {
+    color: var(--sidebar-active-text);
+}
+
+.nav__item-label {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Which service answers this screen — visible on hover / when active */
+.nav__item-service {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: .625rem;
+    color: var(--text-muted);
+    opacity: 0;
+    transition: opacity .15s ease;
+}
+
+.nav__item:hover .nav__item-service,
+.nav__item--active .nav__item-service {
+    opacity: 1;
+}
+
+/* --- Footer --------------------------------------------------------------- */
+
+.nav__foot {
+    margin-top: auto;
+    padding-top: 1.25rem;
+}
+
+.topology {
+    list-style: none;
+    margin: 0 0 .85rem;
+    padding: 0 .35rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3rem;
+}
+
+.nav__version {
+    padding: 0 .6rem;
+    color: var(--text-muted);
+    font-size: .6875rem;
 }

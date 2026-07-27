@@ -1,4 +1,121 @@
-/* You can add global styles to this file, and also import other style files */
+/* ==========================================================================
+   Ledgerly — global design system
+   Tokens are declared once per theme on <html data-theme="…">, which is set
+   before first paint by the bootstrap script in index.html and flipped at
+   runtime by ThemeService. Everything below is written against the tokens,
+   so a theme swap never needs a component change.
+   ========================================================================== */
+
+:root,
+:root[data-theme='light'] {
+    color-scheme: light;
+
+    --page: #f5f6f8;
+    --page-accent: radial-gradient(1200px 500px at 15% -10%, rgba(99, 102, 241, .10), transparent 60%);
+    --surface: #ffffff;
+    --surface-2: #f8fafc;
+    --surface-3: #f1f5f9;
+
+    --border: #e5e7eb;
+    --border-strong: #d3d8e0;
+
+    --text: #0f172a;
+    --text-2: #475569;
+    --text-muted: #6b7280;
+
+    --brand: #4f46e5;
+    --brand-strong: #4338ca;
+    --brand-contrast: #ffffff;
+    --brand-soft: #eef2ff;
+    --brand-ring: rgba(79, 70, 229, .28);
+
+    --sidebar: #ffffff;
+    --sidebar-active-bg: #eef2ff;
+    --sidebar-active-text: #4338ca;
+
+    /* Data viz — single-hue sequential blue, validated against --surface */
+    --viz-series: #2a78d6;
+    --viz-series-soft: rgba(42, 120, 214, .16);
+    --viz-grid: #e8eaef;
+    --viz-axis: #c8ccd4;
+    --viz-label: #6b7280;
+
+    /* Status — fixed roles, always shipped with an icon + label, never alone */
+    --status-good: #0ca30c;
+    --status-good-ink: #056b05;
+    --status-good-bg: rgba(12, 163, 12, .12);
+    --status-warn: #fab219;
+    --status-warn-ink: #8a5b00;
+    --status-warn-bg: rgba(250, 178, 25, .18);
+    --status-critical: #d03b3b;
+    --status-critical-ink: #a32424;
+    --status-critical-bg: rgba(208, 59, 59, .12);
+
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, .06);
+    --shadow: 0 1px 3px rgba(15, 23, 42, .07), 0 8px 24px -12px rgba(15, 23, 42, .18);
+    --shadow-lg: 0 12px 40px -16px rgba(15, 23, 42, .30);
+
+    --radius-sm: 8px;
+    --radius: 12px;
+    --radius-lg: 16px;
+}
+
+:root[data-theme='dark'] {
+    color-scheme: dark;
+
+    --page: #0b0f17;
+    --page-accent: radial-gradient(1200px 500px at 15% -10%, rgba(99, 102, 241, .16), transparent 60%);
+    --surface: #131923;
+    --surface-2: #182031;
+    --surface-3: #1f2839;
+
+    --border: #26314a;
+    --border-strong: #33405c;
+
+    --text: #eef2f8;
+    --text-2: #b3c0d4;
+    --text-muted: #8593a9;
+
+    --brand: #818cf8;
+    --brand-strong: #a5b4fc;
+    --brand-contrast: #0b0f17;
+    --brand-soft: rgba(129, 140, 248, .14);
+    --brand-ring: rgba(129, 140, 248, .35);
+
+    --sidebar: #101622;
+    --sidebar-active-bg: rgba(129, 140, 248, .14);
+    --sidebar-active-text: #c7d2fe;
+
+    --viz-series: #3987e5;
+    --viz-series-soft: rgba(57, 135, 229, .20);
+    --viz-grid: #212b3e;
+    --viz-axis: #33405c;
+    --viz-label: #8593a9;
+
+    --status-good: #0ca30c;
+    --status-good-ink: #4ade80;
+    --status-good-bg: rgba(12, 163, 12, .16);
+    --status-warn: #fab219;
+    --status-warn-ink: #fcd34d;
+    --status-warn-bg: rgba(250, 178, 25, .14);
+    --status-critical: #d03b3b;
+    --status-critical-ink: #fca5a5;
+    --status-critical-bg: rgba(208, 59, 59, .16);
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4);
+    --shadow: 0 1px 3px rgba(0, 0, 0, .5), 0 8px 24px -12px rgba(0, 0, 0, .7);
+    --shadow-lg: 0 12px 40px -16px rgba(0, 0, 0, .8);
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
 
 html,
 body {
@@ -7,5 +124,734 @@ body {
 
 body {
     margin: 0;
-    font-family: Roboto, "Helvetica Neue", sans-serif;
+    background-color: var(--page);
+    background-image: var(--page-accent);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: var(--text);
+    font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    margin: 0;
+    color: var(--text);
+    font-weight: 600;
+    letter-spacing: -0.011em;
+}
+
+p {
+    margin: 0;
+}
+
+a {
+    color: var(--brand);
+    text-decoration: none;
+}
+
+::selection {
+    background: var(--brand-ring);
+}
+
+:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Scrollbars */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+}
+
+*::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: 99px;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Pre-bootstrap splash, rendered inside <app-root> in index.html */
+.app-boot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    height: 100vh;
+    color: var(--text-muted);
+}
+
+.app-boot__mark {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #6366f1, #4338ca);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.25rem;
+    animation: boot-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes boot-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .45;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   Shared building blocks
+   -------------------------------------------------------------------------- */
+
+.page {
+    padding: 1.75rem 2rem 3rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.page-head__title {
+    font-size: 1.5rem;
+    line-height: 1.25;
+}
+
+.page-head__sub {
+    margin-top: .3rem;
+    color: var(--text-2);
+    font-size: .875rem;
+}
+
+.surface-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.card-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: 1.05rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.card-head h2 {
+    font-size: .975rem;
+}
+
+.card-head__sub {
+    color: var(--text-muted);
+    font-size: .8125rem;
+    margin-top: .15rem;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+.muted {
+    color: var(--text-muted);
+}
+
+.mono {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: .8125rem;
+}
+
+.tabular {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Small pill naming the microservice behind a screen — this is a POC, and
+   showing the service boundary is half the point. */
+.service-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .375rem;
+    padding: .2rem .55rem;
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: .6875rem;
+    white-space: nowrap;
+}
+
+.service-chip::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 99px;
+    background: var(--status-good);
+}
+
+/* Status badge — colour is backed by an icon and a text label, never alone */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .375rem;
+    padding: .2rem .55rem;
+    border-radius: 99px;
+    font-size: .75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    white-space: nowrap;
+}
+
+.status-badge i {
+    font-size: .7rem;
+}
+
+.status-badge--paid {
+    background: var(--status-good-bg);
+    color: var(--status-good-ink);
+}
+
+.status-badge--pending {
+    background: var(--status-warn-bg);
+    color: var(--status-warn-ink);
+}
+
+.status-badge--neutral {
+    background: var(--surface-3);
+    color: var(--text-2);
+}
+
+/* Initials avatar — the seed data points image_url at assets that exist only
+   in the original Next.js sample, so we never request them. */
+.avatar {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+    user-select: none;
+}
+
+.avatar--lg {
+    width: 60px;
+    height: 60px;
+    font-size: 1.25rem;
+}
+
+/* Empty / loading states */
+.state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .35rem;
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.state i {
+    font-size: 1.75rem;
+    color: var(--border-strong);
+    margin-bottom: .35rem;
+}
+
+.state strong {
+    color: var(--text);
+    font-weight: 600;
+}
+
+.page--narrow {
+    max-width: 1040px;
+}
+
+.page-head__tools {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+}
+
+.back {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    margin-bottom: 1rem;
+    color: var(--text-muted);
+    font-size: .8125rem;
+    font-weight: 500;
+}
+
+.back:hover {
+    color: var(--text);
+}
+
+.back i {
+    font-size: .75rem;
+}
+
+/* Forms */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+}
+
+.field>label {
+    color: var(--text-2);
+    font-size: .8125rem;
+    font-weight: 600;
+}
+
+.field input,
+.field .p-dropdown {
+    width: 100%;
+}
+
+.field .p-input-icon-left {
+    display: block;
+}
+
+.field__hint {
+    color: var(--text-muted);
+    font-size: .75rem;
+}
+
+.field__error {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    color: var(--status-critical-ink);
+    font-size: .75rem;
+}
+
+.form__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem;
+    padding-top: .35rem;
+    border-top: 1px solid var(--border);
+    margin-top: .25rem;
+}
+
+/* Definition list used for read-only summaries */
+.facts {
+    display: flex;
+    flex-direction: column;
+    gap: .85rem;
+    margin: 1.25rem 0 0;
+    padding-top: 1.15rem;
+    border-top: 1px solid var(--border);
+}
+
+.facts>div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.facts dt {
+    color: var(--text-muted);
+    font-size: .8125rem;
+}
+
+.facts dd {
+    margin: 0;
+    color: var(--text);
+    font-size: .8125rem;
+    font-weight: 500;
+    text-align: right;
+}
+
+/* Toolbar search used by the list pages */
+.search {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    flex-wrap: wrap;
+}
+
+.search__field {
+    display: block;
+}
+
+.search__field input {
+    width: 17rem;
+    max-width: 100%;
+}
+
+/* Person cell: avatar + name over email */
+.who {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    min-width: 0;
+}
+
+.who__text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+    min-width: 0;
+}
+
+.who__text strong {
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.who__text small {
+    color: var(--text-muted);
+    font-size: .75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.row-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .35rem;
+}
+
+/* Specific enough to beat the theme's own thead/tbody cell rules */
+.p-datatable .p-datatable-thead>tr>th.right,
+.p-datatable .p-datatable-tbody>tr>td.right {
+    text-align: right;
+}
+
+/* Buttons — used where a plain element reads better than a PrimeNG button */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    padding: .45rem .85rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text-2);
+    font: inherit;
+    font-size: .8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+
+.btn:hover:not(:disabled) {
+    background: var(--surface-3);
+    color: var(--text);
+}
+
+.btn:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.btn i {
+    font-size: .8125rem;
+}
+
+.btn--primary,
+.btn--primary:hover:not(:disabled) {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: var(--brand-contrast);
+}
+
+.btn--primary:hover:not(:disabled) {
+    background: var(--brand-strong);
+    border-color: var(--brand-strong);
+}
+
+.btn--ghost {
+    background: transparent;
+}
+
+.btn--danger {
+    color: var(--status-critical-ink);
+    border-color: var(--border-strong);
+}
+
+.btn--danger:hover:not(:disabled) {
+    background: var(--status-critical-bg);
+    color: var(--status-critical-ink);
+}
+
+.btn--icon {
+    padding: .4rem;
+    width: 32px;
+    height: 32px;
+}
+
+.btn--block {
+    width: 100%;
+}
+
+/* Inline banner for errors / notices */
+.banner {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    padding: .85rem 1rem;
+    margin-bottom: 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+
+.banner p {
+    color: var(--text-2);
+    font-size: .8125rem;
+    margin-top: .1rem;
+}
+
+.banner>.btn {
+    margin-left: auto;
+}
+
+.banner--error {
+    border-color: color-mix(in srgb, var(--status-critical) 35%, var(--border));
+    background: var(--status-critical-bg);
+}
+
+.banner--error>i {
+    color: var(--status-critical-ink);
+    font-size: 1.05rem;
+}
+
+/* Unstyled-data table used where a PrimeNG table would be overkill */
+.plain-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .8125rem;
+}
+
+.plain-table th,
+.plain-table td {
+    padding: .5rem .25rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.plain-table thead th {
+    color: var(--text-muted);
+    font-size: .7rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.plain-table tbody th {
+    font-weight: 500;
+}
+
+.plain-table tbody tr:last-child th,
+.plain-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.plain-table .right {
+    text-align: right;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.skeleton {
+    border-radius: var(--radius-sm);
+    background: linear-gradient(90deg, var(--surface-3) 25%, var(--surface-2) 50%, var(--surface-3) 75%);
+    background-size: 200% 100%;
+    animation: skeleton 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   PrimeNG overrides — pull the stock Aura theme onto our tokens
+   -------------------------------------------------------------------------- */
+
+.p-component {
+    font-family: inherit;
+    font-size: .875rem;
+}
+
+/* Tables */
+.p-datatable .p-datatable-thead>tr>th {
+    background: var(--surface-2);
+    border-color: var(--border);
+    color: var(--text-muted);
+    font-size: .7rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: .7rem 1.25rem;
+}
+
+.p-datatable .p-datatable-tbody>tr {
+    background: var(--surface);
+    color: var(--text);
+    transition: background-color .15s ease;
+}
+
+.p-datatable .p-datatable-tbody>tr>td {
+    border-color: var(--border);
+    padding: .7rem 1.25rem;
+}
+
+.p-datatable .p-datatable-tbody>tr:last-child>td {
+    border-bottom: 0;
+}
+
+.p-datatable .p-datatable-tbody>tr:hover {
+    background: var(--surface-2);
+}
+
+.p-datatable .p-paginator-bottom {
+    background: var(--surface);
+    border: 0;
+    border-top: 1px solid var(--border);
+    padding: .55rem 1rem;
+}
+
+.p-paginator {
+    background: transparent;
+    color: var(--text-2);
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+    background: var(--brand);
+    color: var(--brand-contrast);
+    border-radius: 8px;
+}
+
+/* Inputs */
+.p-inputtext {
+    background: var(--surface);
+    border-color: var(--border-strong);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+}
+
+.p-inputtext::placeholder {
+    color: var(--text-muted);
+}
+
+.p-inputtext:enabled:focus {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px var(--brand-ring);
+}
+
+.p-input-icon-left>i:first-of-type {
+    color: var(--text-muted);
+    z-index: 1;
+}
+
+/* Buttons */
+.p-button {
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+}
+
+.p-button:focus-visible {
+    box-shadow: 0 0 0 3px var(--brand-ring);
+}
+
+/* Dropdown */
+.p-dropdown {
+    background: var(--surface);
+    border-color: var(--border-strong);
+    border-radius: var(--radius-sm);
+}
+
+.p-dropdown:not(.p-disabled).p-focus {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px var(--brand-ring);
+}
+
+/* Tooltip */
+.p-tooltip .p-tooltip-text {
+    font-size: .75rem;
+    padding: .35rem .6rem;
 }

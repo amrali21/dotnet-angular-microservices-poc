@@ -1,0 +1,19 @@
+.edit-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+/* The customer field is intentionally read-only here — cust-service owns it. */
+:host ::ng-deep input:disabled {
+    background: var(--surface-2);
+    color: var(--text-muted);
+    cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+    .edit-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

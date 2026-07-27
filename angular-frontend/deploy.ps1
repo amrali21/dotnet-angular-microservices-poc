@@ -1,6 +1,6 @@
 $nginxRoot = "C:\nginx-1.27.3"
 $nginxConfig = "$nginxRoot\conf\nginx.conf"
-$buildLocation = Resolve-Path "dist/test-angular/browser"
+$buildLocation = Resolve-Path "dist/ledgerly/browser"
 
 $liveTestConfigs = (get-content -raw $nginxConfig) 
 

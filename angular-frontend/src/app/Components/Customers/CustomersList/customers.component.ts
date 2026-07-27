@@ -1,27 +1,31 @@
-import { Component, OnInit } from '@angular/core';
-import { CustomersService } from '../../../Services/Customers/customers.service';
-import { CustomerFiler } from '../../../Services/Models/models';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { PaginatorComponent } from '../../Common/Paginator/paginator.component';
-import { ButtonModule } from 'primeng/button';
-import { RippleModule } from 'primeng/ripple';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { InputTextModule } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
-import { CommonModule } from '@angular/common';
+import { TooltipModule } from 'primeng/tooltip';
+import { CustomersService } from '../../../Services/Customers/customers.service';
+import { Customer, CustomerFiler } from '../../../Services/Models/models';
+import { avatarColor, initials } from '../../../Shared/display';
 
 @Component({
   selector: 'app-customers',
   standalone: true,
-  imports: [TableModule, CommonModule, InputTextModule, RippleModule, ButtonModule, PaginatorComponent, FormsModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, FormsModule, RouterLink, TableModule, InputTextModule, TooltipModule],
   templateUrl: './customers.component.html',
   styleUrl: './customers.component.css'
 })
 export class CustomersComponent implements OnInit {
 
-  constructor(private customerService: CustomersService, private router: Router, private route: ActivatedRoute) { }
+  private destroyRef = inject(DestroyRef);
+  private customerService = inject(CustomersService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
-  displayedColumns: string[] = ['name', 'email', 'image_url'];
+  readonly loading = this.customerService.loading;
+  readonly error = this.customerService.error;
 
   get query(): string {
     return this.customerService.query;
@@ -31,43 +35,49 @@ export class CustomersComponent implements OnInit {
     this.customerService.setQuery(newQuery);
   }
 
-  get customerList(): any[] {
-    return this.customerService.customersList;
+  get customerList(): Customer[] {
+    return this.customerService.customersList();
   }
 
   get customerListLength(): number {
-    return this.customerService.length;
+    return this.customerService.length();
   }
 
   get filter(): CustomerFiler {
     return this.customerService.filter;
   }
-  // searchFilter: SearchFilter = {pageSize: null, pageIndex: null}
 
   onPage(event: any): void {
-    let newFilter = { ...this.filter, pageSize: event.rows, pageIndex: (event.first / event.rows) }
+    const newFilter = { ...this.filter, pageSize: event.rows, pageIndex: event.first / event.rows };
     this.router.navigate([], {
       queryParams: { ...newFilter },
       queryParamsHandling: 'merge',
     });
   }
 
-  async search(): Promise<any> {
-    console.log(this.query);
-    console.log('search event')
+  search(): void {
     this.router.navigate([], {
       queryParams: { query: this.query, pageIndex: 0 },
       queryParamsHandling: 'merge',
     });
   }
 
-  ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      // before setting the filter, i want to make sure total records are correct. 
-      // 1. we need to query the api, wait for the response
-      // 2. then after the response is back and we know total, we change filter 
-      this.customerService.queryStringChangeEvent(params);
-    }
-    )
+  clear(): void {
+    this.query = '';
+    this.search();
   }
+
+  ngOnInit(): void {
+    this.route.queryParams
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(params => this.customerService.queryStringChangeEvent(params));
+  }
+
+  /** GUIDs are too long for a table cell; the leading block is enough to scan. */
+  shortId(id: string): string {
+    return id ? `${id.slice(0, 8)}…` : '—';
+  }
+
+  readonly initialsOf = initials;
+  readonly colorFor = avatarColor;
 }

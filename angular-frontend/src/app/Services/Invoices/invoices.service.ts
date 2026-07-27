@@ -1,36 +1,63 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
 import { Observable } from 'rxjs';
-import { SearchFilter, LatestInvoice, InvoiceFilter, PagedResult, Customer } from '../Models/models';
+import { LatestInvoice, InvoiceFilter, PagedResult } from '../Models/models';
 import { ACTION_URL } from '../../app.settings';
-import { ActivatedRoute, Router } from '@angular/router';
-import { FormControl, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Injectable({
   providedIn: 'root'
 })
 export class InvoicesService {
 
-  constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute) {
+  constructor(private http: HttpClient, private router: Router) {
   }
 
   invoicesList = signal<LatestInvoice[]>([]);
 
   length = signal<number>(5);
 
+  /** Drives the table's loading / empty / error states. */
+  loading = signal<boolean>(false);
+  error = signal<string | null>(null);
+
   filter: InvoiceFilter = { pageSize: 5, pageIndex: 0, query: '' };
 
+  /**
+   * The edit form is created once and patched on load, so the template's
+   * [formGroup] binding stays pointed at the same instance. `amount` is edited
+   * in dollars and converted back to the cents the API stores.
+   */
   invoiceForm: FormGroup = new FormGroup({
-    name: new FormControl(''),
-    amount: new FormControl(''),
-    status: new FormControl('')
+    id: new FormControl(''),
+    name: new FormControl({ value: '', disabled: true }),
+    email: new FormControl({ value: '', disabled: true }),
+    amount: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
+    status: new FormControl('pending', Validators.required),
   });
 
+  /** The invoice currently open in the edit screen, for the summary panel. */
+  currentInvoice = signal<LatestInvoice | null>(null);
+  saving = signal<boolean>(false);
+
   load(Filter: InvoiceFilter, Callback: () => void): void {
-    this.search(Filter).subscribe(response => {
-      this.invoicesList.set(response.data);
-      this.length.set(response.count);
-      Callback();
+    this.loading.set(true);
+    this.error.set(null);
+
+    this.search(Filter).subscribe({
+      next: response => {
+        this.invoicesList.set(response.data ?? []);
+        this.length.set(response.count ?? 0);
+        this.loading.set(false);
+        Callback();
+      },
+      error: () => {
+        this.invoicesList.set([]);
+        this.length.set(0);
+        this.loading.set(false);
+        this.error.set('Could not reach invoice-service through the API gateway.');
+      },
     });
   }
 
@@ -51,61 +78,87 @@ export class InvoicesService {
   searchById(Id: string | null): void {
     const url = `${ACTION_URL}/InvoiceGW/Invoice/fetchInvoiceById/${Id}`;
 
+    this.loading.set(true);
+    this.error.set(null);
+    this.currentInvoice.set(null);
+
     const headers = new HttpHeaders().set('Accept', 'application/json');
-    this.http.get<LatestInvoice>(url, { headers }).subscribe(response => {
-
-      this.invoiceForm = new FormGroup({
-        name: new FormControl(response.name),
-        amount: new FormControl(response.amount),
-        status: new FormControl({ name: response.status, code: response.status }),//new FormControl(response.status)
-        id: new FormControl(response.id),
-        customerId: new FormControl('')
-      });
-
+    this.http.get<LatestInvoice>(url, { headers }).subscribe({
+      next: response => {
+        this.currentInvoice.set(response);
+        this.invoiceForm.reset({
+          id: response.id,
+          name: response.name,
+          email: response.email,
+          amount: Number(response.amount) / 100,
+          status: response.status,
+        });
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.error.set('Could not load this invoice from invoice-service.');
+      },
     });
   }
 
   editInvoice(): void {
-    const url = `${ACTION_URL}/InvoiceGW/Invoice/updateInvoice`;
-    const headers = new HttpHeaders().set('Accept', 'application/json');
-
-    let invoice: any = { id: this.invoiceForm.value.id, amount: this.invoiceForm.value.amount, status: this.invoiceForm.value.status?.code, customerId: '' };
-
-    this.http.put<LatestInvoice>(url, invoice, { headers }).subscribe(response => {
-      this.router.navigate(['invoices'], /*{ relativeTo:  }*/);
-
-    });
-  }
-
-  deleteInvoice(id: string): void {
-    if (!confirm("Are you sure you want to delete this invoice?")) {
+    if (this.invoiceForm.invalid) {
+      this.invoiceForm.markAllAsTouched();
       return;
     }
 
-    console.log('proceeded to delete')
-    const url = `${ACTION_URL}/InvoiceGW/Invoice/deleteInvoice/${id}`;
-
+    const url = `${ACTION_URL}/InvoiceGW/Invoice/updateInvoice`;
     const headers = new HttpHeaders().set('Accept', 'application/json');
-    this.http.delete<LatestInvoice>(url, { headers }).subscribe(response => {
+    const form = this.invoiceForm.getRawValue();
 
-      this.load({ pageSize: 5, pageIndex: 0, query: '' },
-        () => { }
-      );
+    const invoice = {
+      id: form.id,
+      // back to the cents the API stores
+      amount: Math.round(Number(form.amount) * 100),
+      status: form.status,
+      customerId: '',
+    };
 
+    this.saving.set(true);
+    this.error.set(null);
+
+    this.http.put<LatestInvoice>(url, invoice, { headers }).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.router.navigate(['invoices']);
+      },
+      error: () => {
+        this.saving.set(false);
+        this.error.set('Saving the invoice failed. Please try again.');
+      },
     });
   }
 
-  queryStringChangeEvent(params: any): any {
-    console.log('query change event')
-    let tempFilter = {
+  /**
+   * Confirmation lives in the component (it is a UI concern). After a delete we
+   * reload the page the user is actually on rather than resetting the filter.
+   */
+  deleteInvoice(id: string): void {
+    const url = `${ACTION_URL}/InvoiceGW/Invoice/deleteInvoice/${id}`;
+
+    const headers = new HttpHeaders().set('Accept', 'application/json');
+    this.http.delete<LatestInvoice>(url, { headers }).subscribe({
+      next: () => this.load(this.filter, () => { }),
+      error: () => this.error.set('Deleting the invoice failed. Please try again.'),
+    });
+  }
+
+  queryStringChangeEvent(params: any): void {
+    // Query params arrive as strings; the table needs real numbers.
+    const tempFilter: InvoiceFilter = {
       query: params['query'] || '',
-      pageSize: params['pageSize'] || 5,
-      pageIndex: params['pageIndex'] || 0
+      pageSize: Number(params['pageSize']) || 5,
+      pageIndex: Number(params['pageIndex']) || 0,
     };
 
     this.load(tempFilter, () => {
-      //this.query = params['query'] || ''
-      this.filter = tempFilter
+      this.filter = tempFilter;
     });
   }
 

@@ -1,30 +1,44 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { InvoicesService } from '../../../Services/Invoices/invoices.service';
-import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
-import { RippleModule } from 'primeng/ripple';
-import { InputTextModule } from 'primeng/inputtext';
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { DropdownModule } from 'primeng/dropdown';
+import { InputTextModule } from 'primeng/inputtext';
+import { InvoicesService } from '../../../Services/Invoices/invoices.service';
+import { avatarColor, formatCents, formatDate, initials } from '../../../Shared/display';
 
 @Component({
   selector: 'app-invoices-edit',
   standalone: true,
-  imports: [DropdownModule, InputTextModule, RippleModule, ButtonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, InputTextModule, DropdownModule],
   templateUrl: './invoices-edit.component.html',
   styleUrl: './invoices-edit.component.css'
 })
 export class InvoicesEditComponent implements OnInit {
 
-  constructor(private route: ActivatedRoute, private invoiceService: InvoicesService) { }
+  private route = inject(ActivatedRoute);
+  private invoiceService = inject(InvoicesService);
 
   ID: string | null = '';
-  Status: any = [{ name: 'paid', code: 'paid' }, { name: 'pending', code: 'pending' }];
-  Test: any = { name: 'paid', code: 'paid' };
 
+  readonly statuses = [
+    { label: 'Paid', value: 'paid', icon: 'pi-check' },
+    { label: 'Pending', value: 'pending', icon: 'pi-hourglass' },
+  ];
+
+  readonly invoice = this.invoiceService.currentInvoice;
+  readonly loading = this.invoiceService.loading;
+  readonly saving = this.invoiceService.saving;
+  readonly error = this.invoiceService.error;
 
   get invoiceForm(): FormGroup {
     return this.invoiceService.invoiceForm;
+  }
+
+  /** Only complain once the user has actually interacted with the field. */
+  showError(control: string): boolean {
+    const field = this.invoiceForm.get(control);
+    return !!field && field.invalid && (field.dirty || field.touched);
   }
 
   ngOnInit(): void {
@@ -32,13 +46,12 @@ export class InvoicesEditComponent implements OnInit {
     this.invoiceService.searchById(this.ID);
   }
 
-  // i need make a link between currentInvoice model and the dropdown
-  // i can't directly link them because dropdown accepts an object not a property.
-  // - workarounds?
-  //   + i make a separate object and bind the dropdown to it.
-  //   + then take values from that object into the service
-
-  onSubmit(form: FormGroup) {
+  onSubmit(): void {
     this.invoiceService.editInvoice();
   }
+
+  readonly money = formatCents;
+  readonly date = formatDate;
+  readonly initialsOf = initials;
+  readonly colorFor = avatarColor;
 }

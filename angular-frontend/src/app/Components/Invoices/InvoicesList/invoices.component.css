@@ -1,0 +1,14 @@
+/* The table is flush with the card, so the card head carries the toolbar and
+   the table's own rounded corners come from the card clipping them. */
+:host ::ng-deep .p-datatable-wrapper {
+    border-bottom-left-radius: var(--radius-lg);
+    border-bottom-right-radius: var(--radius-lg);
+}
+
+.surface-card {
+    overflow: hidden;
+}
+
+.card-head {
+    gap: 1rem;
+}

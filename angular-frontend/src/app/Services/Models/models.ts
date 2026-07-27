@@ -3,8 +3,10 @@ export type LatestInvoice = {
     name: string;
     image_url: string;
     email: string;
+    /** Stored in cents — see Shared/display.ts formatCents. */
     amount: string;
     status: string;
+    date?: string;
 };
 
 export type Customer = {

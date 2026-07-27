@@ -1,0 +1,12 @@
+.surface-card {
+    overflow: hidden;
+}
+
+.card-head {
+    gap: 1rem;
+}
+
+:host ::ng-deep .p-datatable-wrapper {
+    border-bottom-left-radius: var(--radius-lg);
+    border-bottom-right-radius: var(--radius-lg);
+}

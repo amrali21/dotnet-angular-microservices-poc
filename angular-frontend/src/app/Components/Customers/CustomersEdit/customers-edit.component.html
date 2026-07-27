@@ -1,1 +1,113 @@
-<p>customers-edit works! current id: {{ ID }}</p>
+<div class="page page--narrow">
+
+  <a class="back" routerLink="/customers"><i class="pi pi-arrow-left"></i> Back to customers</a>
+
+  @if (customer(); as person) {
+
+  <header class="profile">
+    <span class="avatar avatar--lg" [style.background]="colorFor(person.name)">{{ initialsOf(person.name) }}</span>
+    <div class="profile__text">
+      <h1 class="page-head__title">{{ person.name }}</h1>
+      <p class="page-head__sub">
+        <a [href]="'mailto:' + person.email">{{ person.email }}</a>
+        <span class="mono muted"> · {{ person.id }}</span>
+      </p>
+    </div>
+    <span class="service-chip">cust-service</span>
+  </header>
+
+  <section class="tiles">
+    <article class="surface-card tile">
+      <p class="tile__label"><i class="pi pi-wallet"></i> Billed</p>
+      <p class="tile__value tabular">{{ money(billedCents()) }}</p>
+      <p class="tile__foot">{{ invoices().length }} invoice{{ invoices().length === 1 ? '' : 's' }}</p>
+    </article>
+    <article class="surface-card tile">
+      <p class="tile__label"><i class="pi pi-check-circle"></i> Paid</p>
+      <p class="tile__value tabular">{{ money(paidCents()) }}</p>
+      <p class="tile__foot">
+        <span class="status-badge status-badge--paid"><i class="pi pi-check"></i> settled</span>
+      </p>
+    </article>
+    <article class="surface-card tile">
+      <p class="tile__label"><i class="pi pi-clock"></i> Outstanding</p>
+      <p class="tile__value tabular">{{ money(outstandingCents()) }}</p>
+      <p class="tile__foot">
+        <span class="status-badge status-badge--pending"><i class="pi pi-hourglass"></i> awaiting payment</span>
+      </p>
+    </article>
+  </section>
+
+  <section class="surface-card">
+    <div class="card-head">
+      <div>
+        <h2>Invoice history</h2>
+        <p class="card-head__sub">Fetched from invoice-service for this email address.</p>
+      </div>
+      <span class="service-chip">invoice-service</span>
+    </div>
+
+    <div class="card-body">
+      @if (loadingInvoices()) {
+      <div class="skeleton" style="height:8rem"></div>
+      } @else if (invoices().length === 0) {
+      <div class="state">
+        <i class="pi pi-file"></i>
+        <strong>No invoices for this customer</strong>
+      </div>
+      } @else {
+      <table class="plain-table">
+        <thead>
+          <tr>
+            <th scope="col">Invoice</th>
+            <th scope="col">Issued</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="right">Amount</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (invoice of invoices(); track invoice.id) {
+          <tr>
+            <th scope="row" class="mono">#{{ invoice.id }}</th>
+            <td class="muted">{{ date(invoice.date) }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="'status-badge--' + (invoice.status || 'neutral')">
+                <i class="pi" [ngClass]="invoice.status === 'paid' ? 'pi-check' : 'pi-hourglass'"></i>
+                {{ invoice.status || 'unknown' }}
+              </span>
+            </td>
+            <td class="right tabular"><strong>{{ money(invoice.amount) }}</strong></td>
+            <td class="right">
+              <a class="btn btn--icon" [routerLink]="['/invoices', invoice.id]"
+                [attr.aria-label]="'Edit invoice ' + invoice.id">
+                <i class="pi pi-pencil"></i>
+              </a>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+      }
+    </div>
+  </section>
+
+  } @else {
+
+  <!-- Reached by a direct URL: cust-service has no fetch-by-id endpoint, so
+       there is nothing to load from here. -->
+  <section class="surface-card">
+    <div class="state">
+      <i class="pi pi-user"></i>
+      <strong>Customer record not loaded</strong>
+      <span>
+        cust-service has no fetch-by-id endpoint yet, so this page reads the record from
+        the customer list. Open it from there to see the profile.
+      </span>
+      <a class="btn btn--primary" routerLink="/customers" style="margin-top:.75rem">
+        <i class="pi pi-users"></i> Go to customers
+      </a>
+    </div>
+  </section>
+  }
+</div>

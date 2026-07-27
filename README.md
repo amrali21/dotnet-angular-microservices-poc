@@ -14,7 +14,7 @@ where Eureka is dropped in favor of native Kubernetes service discovery.
 | **Dashboard service** | `nextjs-backend-dashboard-service/` | .NET (ASP.NET Core) | `https://localhost:7063` (`:5208` http) | Serves dashboard KPIs / aggregated metrics. |
 | **API gateway** | `next-api-gateway/` | .NET + Ocelot | `https://localhost:7019` (`:8080` http) | Single entry point. Routes `/InvoiceGW`, `/CustomerGW`, `/Dashboard` to the matching service. |
 | **Eureka server** | `eureka-server/` | Java / Spring Boot | `http://localhost:8761` | Service registry/discovery. Used in local and Docker modes only — **not** used on Kubernetes. |
-| **Angular frontend** | `angular-frontend/` | Angular SPA | `http://localhost:4200` | Web UI; calls the backend through the gateway. |
+| **Angular frontend** ("Ledgerly") | `angular-frontend/` | Angular SPA (PrimeNG) | `http://localhost:4200` | Billing console UI; calls the backend through the gateway. See [angular-frontend/README.md](angular-frontend/README.md). |
 
 All three .NET services share a SQL Server database (`nextjs-test`).
 
