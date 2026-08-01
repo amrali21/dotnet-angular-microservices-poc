@@ -32,7 +32,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:5052
-      - "ConnectionStrings__DefaultConnection=Data Source=host.docker.internal\\SQLEXPRESS;Initial Catalog=nextjs-test;User ID=${SQL_USER};Password=${SQL_PASSWORD};TrustServerCertificate=True"
+      - "ConnectionStrings__DefaultConnection=${COMMON_TEMP_DB}"
     networks:
       - microservices-net
     depends_on:
@@ -51,7 +51,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:5246
-      - "ConnectionStrings__DefaultConnection=Data Source=host.docker.internal\\SQLEXPRESS;Initial Catalog=nextjs-test;User ID=${SQL_USER};Password=${SQL_PASSWORD};TrustServerCertificate=True"
+      - "ConnectionStrings__DefaultConnection=${COMMON_TEMP_DB}"
     networks:
       - microservices-net
     depends_on:
@@ -70,7 +70,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:5208
-      - "ConnectionStrings__DefaultConnection=Data Source=host.docker.internal\\SQLEXPRESS;Initial Catalog=nextjs-test;User ID=${SQL_USER};Password=${SQL_PASSWORD};TrustServerCertificate=True"
+      - "ConnectionStrings__DefaultConnection=${COMMON_TEMP_DB}"
     networks:
       - microservices-net
     depends_on:
