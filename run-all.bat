@@ -52,7 +52,7 @@ start "nextjs-backend-dashboard-service" cmd /k "dotnet run --project "%ROOT%nex
 timeout /t 3 /nobreak >nul
 start "next-api-gateway" cmd /k "dotnet run --project "%ROOT%next-api-gateway\next-api-gateway.csproj" --launch-profile https"
 timeout /t 3 /nobreak >nul
-start "angular-frontend" cmd /k "cd /d "%ROOT%angular-frontend" && ng serve"
+start "angular-frontend" cmd /k "cd /d "%ROOT%angular-frontend" && npm start"
 
 echo All 4 backend projects + angular-frontend started in separate windows.
 endlocal
