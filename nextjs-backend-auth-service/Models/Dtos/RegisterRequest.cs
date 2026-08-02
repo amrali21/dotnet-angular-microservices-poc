@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace nextjs_backend.Models
+namespace nextjs_backend_auth_service.Models.Dtos
 {
-    public partial class User
+    public class RegisterRequest
     {
-        public string Id { get; set; } = null!;
         public string Name { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string Password { get; set; } = null!;

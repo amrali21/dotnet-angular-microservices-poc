@@ -365,6 +365,8 @@ CLAUDE.md
 .claude
 # Kubernetes secret with real credentials — keep local, use 01-db-secret.example.yaml as template
 k8s/01-db-secret.yaml
+# Kubernetes secret with the real JWT signing key — keep local, use 04-jwt-secret.example.yaml as template
+k8s/04-jwt-secret.yaml
 
 #questions.txt is a file that contains questions for the project. It is not necessary for the project to function, and it may contain sensitive information. Therefore, it should be ignored by Git.
 questions.txt

@@ -1,3 +1,5 @@
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
 using Ocelot.Cache.CacheManager;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
@@ -12,6 +14,23 @@ builder.Configuration
 builder.Services.AddCors();
 
 builder.Services
+    .AddAuthentication()
+    .AddJwtBearer("Bearer", options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
+builder.Services
     .AddOcelot(builder.Configuration)
     .AddEureka()
     .AddCacheManager(x => x.WithDictionaryHandle());
@@ -23,6 +42,8 @@ app.UseCors(b => b
     .AllowAnyMethod()
     .AllowAnyHeader()
 );
+
+app.UseAuthentication();
 
 await app.UseOcelot();
 await app.RunAsync();

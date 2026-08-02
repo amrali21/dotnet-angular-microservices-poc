@@ -69,20 +69,6 @@ BEGIN
 END
 GO
 
-/****** Table: users ******/
-IF OBJECT_ID(N'dbo.users', N'U') IS NULL
-BEGIN
-    CREATE TABLE [dbo].[users](
-        [id]       [varchar](255) NOT NULL,
-        [name]     [varchar](255) NOT NULL,
-        [email]    [varchar](255) NOT NULL,
-        [password] [text]         NOT NULL,
-        PRIMARY KEY CLUSTERED ([id] ASC),
-        CONSTRAINT [UQ_users_email] UNIQUE NONCLUSTERED ([email] ASC)
-    );
-END
-GO
-
 USE [master]
 GO
 ALTER DATABASE [nextjs-test] SET READ_WRITE;

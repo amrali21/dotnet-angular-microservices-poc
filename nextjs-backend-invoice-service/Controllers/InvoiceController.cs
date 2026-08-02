@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -10,6 +11,7 @@ namespace nextjs_backend.Controllers
     //[Route("api/[controller]")]
     [Route("[controller]/[action]")]
     [ApiController]
+    [Authorize]
     public class InvoiceController : ControllerBase
     {
         nextjstestContext _nextjstestContext;
@@ -251,22 +253,6 @@ namespace nextjs_backend.Controllers
             }
 
             return Ok();
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> getUser(string email)
-        {
-            var output = (from u in _nextjstestContext.Users
-             where u.Email == email
-             select new
-             {
-                 id = u.Id,
-                 name = u.Name,
-                 email = u.Email,
-                 password = u.Password
-             }).ToListAsync();
-
-            return Ok(output);
         }
 
         [HttpPost]

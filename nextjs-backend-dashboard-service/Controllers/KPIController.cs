@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using nextjs_backend_dashboard_service.Models;
@@ -6,6 +7,7 @@ namespace nextjs_backend_dashboard_service.Controllers
 {
     [Route("[controller]/[action]")]
     [ApiController]
+    [Authorize]
     public class KPIController : ControllerBase
     {
         nextjstestContext _nextjstestContext;

@@ -9,7 +9,11 @@
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
       },
-      "DangerousAcceptAnyServerCertificateValidator": true
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKeys": [ "Bearer" ],
+        "AllowedScopes": []
+      }
     },
     {
       "UpstreamPathTemplate": "/CustomerGW/{everything}",
@@ -20,7 +24,11 @@
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
       },
-      "DangerousAcceptAnyServerCertificateValidator": true    
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKeys": [ "Bearer" ],
+        "AllowedScopes": []
+      }
     },
     {
       "UpstreamPathTemplate": "/Dashboard/{everything}",
@@ -31,7 +39,22 @@
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
       },
-      "DangerousAcceptAnyServerCertificateValidator": true 
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKeys": [ "Bearer" ],
+        "AllowedScopes": []
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/AuthGW/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "https",
+      "ServiceName": "auth-service",
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      },
+      "DangerousAcceptAnyServerCertificateValidator": true
     }
   ],
   "GlobalConfiguration": {

@@ -1,8 +1,7 @@
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using nextjs_backend_dashboard_service.Models;
+using nextjs_backend_auth_service.Helpers;
+using nextjs_backend_auth_service.Models;
 using Steeltoe.Discovery.Client;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,26 +18,24 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
-builder.Services.AddDbContext<nextjstestContext>(options =>
+builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequiredLength = 8;
+    options.User.RequireUniqueEmail = true;
+})
+    .AddEntityFrameworkStores<AuthDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddDiscoveryClient(builder.Configuration);
 builder.Services.AddOpenApi();
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidateAudience = true,
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
-        };
-    });
 
 var app = builder.Build();
 
@@ -49,7 +46,6 @@ if (app.Environment.IsDevelopment())
 }
 
 //app.UseDiscoveryClient();
-app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

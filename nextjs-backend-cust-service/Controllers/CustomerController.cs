@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -8,6 +9,7 @@ namespace nextjs_backend_cust_service.Controllers
 {
     [Route("[controller]/[action]")]
     [ApiController]
+    [Authorize]
     public class CustomerController : ControllerBase
     {
         nextjstestContext _nextjstestContext;

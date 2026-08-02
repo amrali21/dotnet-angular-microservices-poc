@@ -7,15 +7,6 @@ namespace nextjs_backend.Helpers
     {
         public static void Seed(this ModelBuilder modelBuilder)
         {
-            List<User> users= new List<User>() {
-                new User{ 
-                    Id= "410544b2-4001-4271-9855-fec4b6a6442a",
-                    Name= "User",
-                    Email= "user@nextmail.com",
-                    Password= "123456"
-                }
-            };
-
             List<Customer> customers = new List<Customer> {
              new Customer {
                 Id = "3958dc9e-712f-4377-85e9-fec4b6a6442a",
@@ -213,10 +204,6 @@ namespace nextjs_backend.Helpers
                  new Revenue { Month= "Nov", Revenue1= 3000 },
                  new Revenue { Month= "Dec", Revenue1= 4800 },
             };
-
-            modelBuilder.Entity<User>().HasData(
-                users
-            );
 
             modelBuilder.Entity<Customer>().HasData(
                 customers

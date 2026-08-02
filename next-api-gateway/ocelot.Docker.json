@@ -8,6 +8,10 @@
       "ServiceName": "invoice-service",
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKeys": [ "Bearer" ],
+        "AllowedScopes": []
       }
     },
     {
@@ -18,6 +22,10 @@
       "ServiceName": "cust-service",
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKeys": [ "Bearer" ],
+        "AllowedScopes": []
       }
     },
     {
@@ -26,6 +34,20 @@
       "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "http",
       "ServiceName": "dashboard-service",
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKeys": [ "Bearer" ],
+        "AllowedScopes": []
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/AuthGW/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "auth-service",
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
       }
