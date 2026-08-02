@@ -33,6 +33,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:5052
       - "ConnectionStrings__DefaultConnection=${COMMON_TEMP_DB}"
+      - "Jwt__Key=${JWT_KEY}"
+      - "Jwt__Issuer=${JWT_ISSUER}"
+      - "Jwt__Audience=${JWT_AUDIENCE}"
     networks:
       - microservices-net
     depends_on:
@@ -52,6 +55,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:5246
       - "ConnectionStrings__DefaultConnection=${COMMON_TEMP_DB}"
+      - "Jwt__Key=${JWT_KEY}"
+      - "Jwt__Issuer=${JWT_ISSUER}"
+      - "Jwt__Audience=${JWT_AUDIENCE}"
     networks:
       - microservices-net
     depends_on:
@@ -71,6 +77,32 @@ services:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:5208
       - "ConnectionStrings__DefaultConnection=${COMMON_TEMP_DB}"
+      - "Jwt__Key=${JWT_KEY}"
+      - "Jwt__Issuer=${JWT_ISSUER}"
+      - "Jwt__Audience=${JWT_AUDIENCE}"
+    networks:
+      - microservices-net
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  auth-service:
+    build:
+      context: ./nextjs-backend-auth-service
+    image: xamrxxx/auth-service:${TAG:-latest}
+    container_name: auth-service
+    ports:
+      - "5109:5109"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:5109
+      - "ConnectionStrings__DefaultConnection=${COMMON_TEMP_DB}"
+      - "Jwt__Key=${JWT_KEY}"
+      - "Jwt__Issuer=${JWT_ISSUER}"
+      - "Jwt__Audience=${JWT_AUDIENCE}"
+      - "Jwt__ExpiresMinutes=${JWT_EXPIRES_MINUTES}"
     networks:
       - microservices-net
     depends_on:
@@ -89,6 +121,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:8080
+      - "Jwt__Key=${JWT_KEY}"
+      - "Jwt__Issuer=${JWT_ISSUER}"
+      - "Jwt__Audience=${JWT_AUDIENCE}"
     networks:
       - microservices-net
     depends_on:
