@@ -4,14 +4,20 @@ import { CustomersComponent } from './Components/Customers/CustomersList/custome
 import { InvoicesComponent } from './Components/Invoices/InvoicesList/invoices.component';
 import { CustomersEditComponent } from './Components/Customers/CustomersEdit/customers-edit.component';
 import { InvoicesEditComponent } from './Components/Invoices/InvoicesEdit/invoices-edit.component';
+import { LoginComponent } from './Components/Auth/Login/login.component';
+import { RegisterComponent } from './Components/Auth/Register/register.component';
+import { authGuard } from './Guards/auth.guard';
 
 export const routes: Routes = [
-    { path: '', component: HomeComponent },
+    { path: 'login', component: LoginComponent },
+    { path: 'register', component: RegisterComponent },
 
-    { path: 'customers', component: CustomersComponent },
-    { path: 'customers/:id', component: CustomersEditComponent },
+    { path: '', component: HomeComponent, canActivate: [authGuard] },
 
-    { path: 'invoices', component: InvoicesComponent },
-    { path: 'invoices/:id', component: InvoicesEditComponent },
+    { path: 'customers', component: CustomersComponent, canActivate: [authGuard] },
+    { path: 'customers/:id', component: CustomersEditComponent, canActivate: [authGuard] },
+
+    { path: 'invoices', component: InvoicesComponent, canActivate: [authGuard] },
+    { path: 'invoices/:id', component: InvoicesEditComponent, canActivate: [authGuard] },
 
 ];

@@ -31,5 +31,5 @@ export class SideNavComponent {
     { label: 'Customers', route: '/customers', icon: 'pi-users', service: 'customers', exact: false },
   ];
 
-  readonly services = ['api-gateway', 'invoice-service', 'cust-service', 'dashboard-service'];
+  readonly services = ['api-gateway', 'invoice-service', 'cust-service', 'dashboard-service', 'auth-service'];
 }

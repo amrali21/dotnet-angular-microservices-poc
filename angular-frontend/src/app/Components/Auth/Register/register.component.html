@@ -1,0 +1,67 @@
+<div class="auth-page">
+  <div class="auth-card surface-card">
+    <div class="auth-card__brand">
+      <span class="brand__mark">L</span>
+      <strong>Ledgerly</strong>
+    </div>
+
+    <div class="card-head">
+      <div>
+        <h2>Create an account</h2>
+        <p class="card-head__sub">Register to access the billing console.</p>
+      </div>
+    </div>
+
+    <div class="card-body">
+      @if (error()) {
+      <div class="banner banner--error" role="alert">
+        <i class="pi pi-exclamation-triangle"></i>
+        <div>
+          <strong>Couldn't create your account</strong>
+          <p>{{ error() }}</p>
+        </div>
+      </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
+        <div class="field">
+          <label for="name">Name</label>
+          <input id="name" type="text" pInputText formControlName="name" autocomplete="name"
+            [class.p-invalid]="showError('name')" />
+          @if (showError('name')) {
+          <small class="field__error"><i class="pi pi-exclamation-circle"></i> Name is required.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" pInputText formControlName="email" autocomplete="email"
+            [class.p-invalid]="showError('email')" />
+          @if (showError('email')) {
+          <small class="field__error"><i class="pi pi-exclamation-circle"></i> Enter a valid email address.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" type="password" pInputText formControlName="password" autocomplete="new-password"
+            [class.p-invalid]="showError('password')" />
+          @if (showError('password')) {
+          <small class="field__error"><i class="pi pi-exclamation-circle"></i> At least 8 characters, with an upper case letter, a lower case letter, a digit, and a symbol.</small>
+          } @else {
+          <small class="field__hint">At least 8 characters, with an upper case letter, a lower case letter, a digit, and a symbol.</small>
+          }
+        </div>
+
+        <div class="form__actions form__actions--stretch">
+          <button type="submit" class="btn btn--primary btn--block" [disabled]="submitting()">
+            <i class="pi" [ngClass]="submitting() ? 'pi-spin pi-spinner' : 'pi-user-plus'"></i>
+            {{ submitting() ? 'Creating account…' : 'Create account' }}
+          </button>
+        </div>
+      </form>
+
+      <p class="auth-card__switch">Already have an account? <a routerLink="/login">Sign in</a></p>
+    </div>
+  </div>
+</div>

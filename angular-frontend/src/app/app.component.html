@@ -1,3 +1,6 @@
+@if (isAuthRoute()) {
+<router-outlet />
+} @else {
 <div class="shell" [class.shell--nav-open]="navOpen()">
 
   <app-side-nav class="shell__nav" (navigated)="closeNav()" />
@@ -29,14 +32,20 @@
           <i class="pi" [ngClass]="theme.isDark() ? 'pi-sun' : 'pi-moon'"></i>
         </button>
 
-        <!-- Static: the POC has no auth service, so there is no session to read. -->
+        @if (auth.currentUser(); as user) {
         <div class="topbar__user">
-          <span class="avatar" style="background:#4f46e5">SO</span>
+          <span class="avatar" [style.background]="colorFor(user.displayName)">{{ initialsOf(user.displayName) }}</span>
           <span class="topbar__user-meta">
-            <strong>Sam Okafor</strong>
-            <small>Billing admin</small>
+            <strong>{{ user.displayName }}</strong>
+            <small>{{ user.email }}</small>
           </span>
         </div>
+
+        <button type="button" class="icon-btn" (click)="logout()" aria-label="Sign out" pTooltip="Sign out"
+          tooltipPosition="bottom">
+          <i class="pi pi-sign-out"></i>
+        </button>
+        }
       </div>
     </header>
 
@@ -45,3 +54,4 @@
     </main>
   </div>
 </div>
+}

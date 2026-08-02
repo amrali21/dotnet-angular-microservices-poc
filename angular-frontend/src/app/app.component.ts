@@ -6,6 +6,10 @@ import { filter, map, startWith } from 'rxjs';
 import { TooltipModule } from 'primeng/tooltip';
 import { SideNavComponent } from './Components/Common/side-nav/side-nav.component';
 import { ThemeService } from './Services/Theme/theme.service';
+import { AuthService } from './Services/Auth/auth.service';
+import { avatarColor, initials } from './Shared/display';
+
+const AUTH_ROUTES = ['login', 'register'];
 
 const SECTION_TITLES: Record<string, string> = {
   '': 'Overview',
@@ -23,6 +27,7 @@ const SECTION_TITLES: Record<string, string> = {
 export class AppComponent {
 
   readonly theme = inject(ThemeService);
+  readonly auth = inject(AuthService);
   private router = inject(Router);
 
   /** Drawer state — only meaningful below the tablet breakpoint. */
@@ -37,10 +42,15 @@ export class AppComponent {
     { initialValue: this.router.url },
   );
 
-  readonly sectionTitle = computed(() => {
-    const segment = this.url().split('?')[0].split('/').filter(Boolean)[0] ?? '';
-    return SECTION_TITLES[segment] ?? 'Overview';
-  });
+  private segment = computed(() => this.url().split('?')[0].split('/').filter(Boolean)[0] ?? '');
+
+  readonly sectionTitle = computed(() => SECTION_TITLES[this.segment()] ?? 'Overview');
+
+  /** Login/register are full-page views — the dashboard shell has nothing to show yet. */
+  readonly isAuthRoute = computed(() => AUTH_ROUTES.includes(this.segment()));
+
+  readonly initialsOf = initials;
+  readonly colorFor = avatarColor;
 
   toggleNav(): void {
     this.navOpen.update(open => !open);
@@ -48,5 +58,10 @@ export class AppComponent {
 
   closeNav(): void {
     this.navOpen.set(false);
+  }
+
+  logout(): void {
+    this.auth.logout();
+    this.router.navigateByUrl('/login');
   }
 }

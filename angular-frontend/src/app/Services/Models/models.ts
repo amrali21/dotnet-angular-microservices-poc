@@ -55,3 +55,26 @@ export type KpiCardData = {
         pending: number;
     };
 }
+
+export type AuthUser = {
+    id: string;
+    email: string;
+    displayName: string;
+};
+
+export type RegisterRequest = {
+    name: string;
+    email: string;
+    password: string;
+};
+
+export type LoginRequest = {
+    email: string;
+    password: string;
+};
+
+export type AuthResponse = {
+    token: string;
+    expiresAtUtc: string;
+    user: AuthUser;
+};
