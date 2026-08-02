@@ -5,6 +5,7 @@
 #   /InvoiceGW/*  -> api-gateway -> invoice-service
 #   /CustomerGW/* -> api-gateway -> cust-service
 #   /Dashboard/*  -> api-gateway -> dashboard-service
+#   /AuthGW/*     -> api-gateway -> auth-service
 #   /             -> angular-frontend (the SPA + its assets)
 #
 # Because the SPA and the API share this host, the browser calls the API on the
@@ -45,6 +46,13 @@ spec:
                 port:
                   number: 8080
           - path: /Dashboard
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 8080
+          - path: /AuthGW
             pathType: Prefix
             backend:
               service:

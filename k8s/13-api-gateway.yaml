@@ -27,6 +27,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: dotnet-common-config   # also disables the gateway's Eureka client
+            - secretRef:
+                name: jwt-secret
           volumeMounts:
             # Replace the Eureka-based ocelot.json baked into the image with the
             # Kubernetes (direct-DNS) routing from the gateway-ocelot-config ConfigMap.

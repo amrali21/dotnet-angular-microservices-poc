@@ -29,6 +29,8 @@ spec:
                 name: dotnet-common-config
             - secretRef:
                 name: db-secret
+            - secretRef:
+                name: jwt-secret
           resources:
             requests:
               cpu: "100m"

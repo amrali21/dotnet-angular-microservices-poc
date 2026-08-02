@@ -1,29 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cust-service
+  name: auth-service
   namespace: microservices
   labels:
-    app: cust-service
+    app: auth-service
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: cust-service
+      app: auth-service
   template:
     metadata:
       labels:
-        app: cust-service
+        app: auth-service
     spec:
       containers:
-        - name: cust-service
-          image: cust-service:latest
+        - name: auth-service
+          image: auth-service:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 5246
+            - containerPort: 5109
           env:
             - name: ASPNETCORE_URLS
-              value: "http://+:5246"
+              value: "http://+:5109"
           envFrom:
             - configMapRef:
                 name: dotnet-common-config
@@ -38,28 +38,29 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
+          # TCP probes make NO assumption about a /health endpoint existing.
           readinessProbe:
             tcpSocket:
-              port: 5246
+              port: 5109
             initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
             tcpSocket:
-              port: 5246
+              port: 5109
             initialDelaySeconds: 20
             periodSeconds: 15
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: cust-service
+  name: auth-service
   namespace: microservices
   labels:
-    app: cust-service
+    app: auth-service
 spec:
-  type: ClusterIP          # internal only — reachable as http://cust-service:5246
+  type: ClusterIP          # internal only — reachable as http://auth-service:5109
   selector:
-    app: cust-service
+    app: auth-service
   ports:
-    - port: 5246
-      targetPort: 5246
+    - port: 5109
+      targetPort: 5109

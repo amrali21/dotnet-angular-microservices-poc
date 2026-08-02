@@ -10,11 +10,13 @@ resources:
   - 01-db-secret.yaml
   - 02-common-config.yaml
   - 03-gateway-ocelot-config.yaml
+  - 04-jwt-secret.yaml
   - 10-invoice-service.yaml
   - 11-cust-service.yaml
   - 12-dashboard-service.yaml
   - 13-api-gateway.yaml
   - 14-angular-frontend.yaml
+  - 15-auth-service.yaml
   - 20-ingress.yaml
   - 30-hpa.yaml
 
@@ -37,6 +39,9 @@ images:
     newTag: "v2"
   - name: angular-frontend
     newName: xamrxxx/angular-frontend
+    newTag: "v2"
+  - name: auth-service
+    newName: xamrxxx/auth-service
     newTag: "v2"
 
 # following block is used to test whether kubernetes would pull the latest image from the registry instead of using a cached image. 

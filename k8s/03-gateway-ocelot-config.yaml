@@ -27,7 +27,11 @@ data:
           "DownstreamHostAndPorts": [
             { "Host": "invoice-service", "Port": 5052 }
           ],
-          "LoadBalancerOptions": { "Type": "RoundRobin" }
+          "LoadBalancerOptions": { "Type": "RoundRobin" },
+          "AuthenticationOptions": {
+            "AuthenticationProviderKeys": [ "Bearer" ],
+            "AllowedScopes": []
+          }
         },
         {
           "UpstreamPathTemplate": "/CustomerGW/{everything}",
@@ -37,7 +41,11 @@ data:
           "DownstreamHostAndPorts": [
             { "Host": "cust-service", "Port": 5246 }
           ],
-          "LoadBalancerOptions": { "Type": "RoundRobin" }
+          "LoadBalancerOptions": { "Type": "RoundRobin" },
+          "AuthenticationOptions": {
+            "AuthenticationProviderKeys": [ "Bearer" ],
+            "AllowedScopes": []
+          }
         },
         {
           "UpstreamPathTemplate": "/Dashboard/{everything}",
@@ -46,6 +54,20 @@ data:
           "DownstreamScheme": "http",
           "DownstreamHostAndPorts": [
             { "Host": "dashboard-service", "Port": 5208 }
+          ],
+          "LoadBalancerOptions": { "Type": "RoundRobin" },
+          "AuthenticationOptions": {
+            "AuthenticationProviderKeys": [ "Bearer" ],
+            "AllowedScopes": []
+          }
+        },
+        {
+          "UpstreamPathTemplate": "/AuthGW/{everything}",
+          "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+          "DownstreamPathTemplate": "/{everything}",
+          "DownstreamScheme": "http",
+          "DownstreamHostAndPorts": [
+            { "Host": "auth-service", "Port": 5109 }
           ],
           "LoadBalancerOptions": { "Type": "RoundRobin" }
         }
