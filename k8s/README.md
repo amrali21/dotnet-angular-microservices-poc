@@ -5,10 +5,14 @@ design — the same services as `docker-compose.yml`, but:
 
 - **Eureka is gone.** Discovery is done by Kubernetes DNS + ClusterIP Services.
   The gateway routes straight to `invoice-service:5052`, `cust-service:5246`,
-  `dashboard-service:5208`, and ClusterIP still load-balances across replicas.
-- **One public entry point** (an Ingress) instead of publishing 6 host ports.
+  `dashboard-service:5208`, `auth-service:5109`, and ClusterIP still load-balances
+  across replicas.
+- **One public entry point** (an Ingress) instead of publishing host ports.
   Only the Ingress is reachable from outside; every Service is internal.
 - **The database is externalized** into a Secret (no more `host.docker.internal`).
+- **JWT auth**: `auth-service` owns ASP.NET Core Identity and issues tokens;
+  the gateway and the 3 downstream services validate them independently using a
+  shared signing key (Secret: `jwt-secret`).
 - **Autoscaling** via HPAs on CPU.
 
 ```
@@ -17,7 +21,9 @@ design — the same services as `docker-compose.yml`, but:
                       /InvoiceGW   → api-gateway → invoice-service
                       /CustomerGW  → api-gateway → cust-service
                       /Dashboard   → api-gateway → dashboard-service
+                      /AuthGW      → api-gateway → auth-service
    external SQL Server  ←─ (Secret: db-secret)
+   JWT signing key      ←─ (Secret: jwt-secret)
    [eureka-server: deleted]
 ```
 
@@ -29,9 +35,11 @@ design — the same services as `docker-compose.yml`, but:
 | `01-db-secret.yaml`            | DB connection string — **edit before deploying** |
 | `02-common-config.yaml`       | Shared env: `ASPNETCORE_ENVIRONMENT=Production` + Eureka-off flags |
 | `03-gateway-ocelot-config.yaml`| Eureka-free `ocelot.json`, mounted over the gateway image |
+| `04-jwt-secret.yaml`           | JWT signing key/issuer/audience — **edit before deploying** |
 | `10/11/12-*-service.yaml`      | The 3 .NET services: Deployment + ClusterIP Service |
 | `13-api-gateway.yaml`          | Ocelot gateway: Deployment + ClusterIP Service |
 | `14-angular-frontend.yaml`     | Angular SPA (nginx): Deployment + ClusterIP Service |
+| `15-auth-service.yaml`         | Identity/JWT auth service: Deployment + ClusterIP Service |
 | `20-ingress.yaml`              | Single public entry point, path-based routing |
 | `30-hpa.yaml`                  | HorizontalPodAutoscalers (CPU 70%) |
 | `kustomization.yaml`           | Applies everything together |
@@ -93,23 +101,34 @@ docker compose -f docker-compose.yml -f docker-compose.push.yml build
 > minikube image load xamrxxx/invoice-service:latest
 > minikube image load xamrxxx/cust-service:latest
 > minikube image load xamrxxx/dashboard-service:latest
+> minikube image load xamrxxx/auth-service:latest
 > minikube image load xamrxxx/api-gateway:latest
 > minikube image load xamrxxx/angular-frontend:latest
 > ```
 
-## 2. Set the database secret
+## 2. Set the DB and JWT secrets
 
-`01-db-secret.yaml` is **gitignored** (it holds real credentials). Create it from
-the committed template and fill in your password:
+`01-db-secret.yaml` and `04-jwt-secret.yaml` are **gitignored** (they hold real
+credentials). Create them from the committed templates:
 
 ```bash
 cp k8s/01-db-secret.example.yaml k8s/01-db-secret.yaml
 # edit k8s/01-db-secret.yaml -> set the real Password (and host for cloud)
+
+cp k8s/04-jwt-secret.example.yaml k8s/04-jwt-secret.yaml
+# edit k8s/04-jwt-secret.yaml -> set a real random Jwt__Key, e.g.: openssl rand -base64 64
 ```
 
-`kustomization.yaml` references `01-db-secret.yaml`, so this file must exist
-locally before `kubectl apply -k`. For real environments prefer
-`kubectl create secret` or an external-secrets operator over a file on disk.
+`kustomization.yaml` references both files, so they must exist locally before
+`kubectl apply -k`. For real environments prefer `kubectl create secret` or an
+external-secrets operator over a file on disk.
+
+> **Troubleshooting**: `auth-service`, `api-gateway`, `invoice-service`,
+> `cust-service`, and `dashboard-service` all read `Jwt__Key`/`Jwt__Issuer`/
+> `Jwt__Audience` from the same `jwt-secret`. If any protected call 401s
+> unexpectedly, check that all 5 Deployments picked up the same Secret values
+> (`kubectl rollout restart` after editing the Secret — env vars don't
+> hot-reload into running pods).
 
 ## 3. Deploy
 
