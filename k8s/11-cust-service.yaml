@@ -21,14 +21,15 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5246
-          env:
-            - name: ASPNETCORE_URLS
-              value: "http://+:5246"
+            - containerPort: 5247
+          # No ASPNETCORE_URLS: cust-service's Kestrel:Endpoints in
+          # appsettings.json (Http:5246 + Grpc:5247) takes precedence and
+          # would silently override it anyway.
           envFrom:
             - configMapRef:
                 name: dotnet-common-config
             - secretRef:
-                name: db-secret
+                name: customer-db-secret
             - secretRef:
                 name: jwt-secret
           resources:
@@ -61,5 +62,9 @@ spec:
   selector:
     app: cust-service
   ports:
-    - port: 5246
+    - name: rest
+      port: 5246
       targetPort: 5246
+    - name: grpc
+      port: 5247
+      targetPort: 5247

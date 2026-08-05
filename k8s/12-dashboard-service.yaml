@@ -28,7 +28,7 @@ spec:
             - configMapRef:
                 name: dotnet-common-config
             - secretRef:
-                name: db-secret
+                name: dashboard-db-secret
             - secretRef:
                 name: jwt-secret
           resources:

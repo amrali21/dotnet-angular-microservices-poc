@@ -24,11 +24,13 @@ spec:
           env:
             - name: ASPNETCORE_URLS
               value: "http://+:5052"
+            - name: GrpcServices__CustomerService
+              value: "http://cust-service:5247"
           envFrom:
             - configMapRef:
                 name: dotnet-common-config
             - secretRef:
-                name: db-secret
+                name: invoice-db-secret
             - secretRef:
                 name: jwt-secret
           resources:
