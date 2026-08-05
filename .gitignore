@@ -371,3 +371,4 @@ k8s/04-jwt-secret.yaml
 #questions.txt is a file that contains questions for the project. It is not necessary for the project to function, and it may contain sensitive information. Therefore, it should be ignored by Git.
 questions.txt
 next.txt
+.env
