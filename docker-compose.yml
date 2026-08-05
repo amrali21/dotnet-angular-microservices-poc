@@ -32,7 +32,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:5052
-      - "ConnectionStrings__DefaultConnection=${COMMON_TEMP_DB}"
+      - "ConnectionStrings__DefaultConnection=${INVOICE_DB}"
       - "Jwt__Key=${JWT_KEY}"
       - "Jwt__Issuer=${JWT_ISSUER}"
       - "Jwt__Audience=${JWT_AUDIENCE}"
@@ -51,10 +51,13 @@ services:
     container_name: cust-service
     ports:
       - "5246:5246"
+      - "5247:5247"
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
-      - ASPNETCORE_URLS=http://+:5246
-      - "ConnectionStrings__DefaultConnection=${COMMON_TEMP_DB}"
+      # No ASPNETCORE_URLS here: cust-service's Kestrel:Endpoints in
+      # appsettings.json (Http:5246 + Grpc:5247) takes precedence and would
+      # silently override it anyway — see appsettings.json for the ports.
+      - "ConnectionStrings__DefaultConnection=${CUSTOMER_DB}"
       - "Jwt__Key=${JWT_KEY}"
       - "Jwt__Issuer=${JWT_ISSUER}"
       - "Jwt__Audience=${JWT_AUDIENCE}"
@@ -76,7 +79,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:5208
-      - "ConnectionStrings__DefaultConnection=${COMMON_TEMP_DB}"
+      - "ConnectionStrings__DefaultConnection=${DASHBOARD_DB}"
       - "Jwt__Key=${JWT_KEY}"
       - "Jwt__Issuer=${JWT_ISSUER}"
       - "Jwt__Audience=${JWT_AUDIENCE}"
@@ -98,7 +101,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:5109
-      - "ConnectionStrings__DefaultConnection=${COMMON_TEMP_DB}"
+      - "ConnectionStrings__DefaultConnection=${AUTH_DB}"
       - "Jwt__Key=${JWT_KEY}"
       - "Jwt__Issuer=${JWT_ISSUER}"
       - "Jwt__Audience=${JWT_AUDIENCE}"
