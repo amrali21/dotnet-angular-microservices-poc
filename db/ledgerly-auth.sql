@@ -2,11 +2,17 @@
    ASP.NET Core Identity schema for the new auth-service
    (IdentityDbContext<ApplicationUser>, ApplicationUser adds a
    DisplayName column on top of the stock IdentityUser).
-   Run against the same [nextjs-test] database the other services
+   Run against the same [ledgerly-test] database the other services
    use. Idempotent — safe to re-run.
    ============================================================ */
 
-USE [nextjs-test]
+IF DB_ID(N'ledgerly-auth') IS NULL
+BEGIN
+    CREATE DATABASE [ledgerly-auth];
+END
+GO
+
+USE [ledgerly-auth]
 GO
 
 /****** Table: AspNetRoles ******/
