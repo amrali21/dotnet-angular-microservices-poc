@@ -31,16 +31,81 @@ namespace nextjs_backend_dashboard_service.Controllers
         [HttpGet]
         public async Task<IActionResult> getCardData()
         {
+            var kpi = await _nextjstestContext.Kpis.FirstOrDefaultAsync();
+
             return Ok(new
             {
-                invoiceCount = _nextjstestContext.Invoices.Count(),
-                customerCount = _nextjstestContext.Customers.Count(),
-                invoiceStatus = new
-                {
-                    paid = _nextjstestContext.Invoices.Where(i => i.Status == "paid").Sum(i => i.Amount),
-                    pending = _nextjstestContext.Invoices.Where(i => i.Status == "pending").Sum(i => i.Amount),
-                }
+                totalBilled = kpi?.TotalBilled ?? 0,
+                collected = kpi?.Collected ?? 0,
+                outstanding = kpi?.Outstanding ?? 0,
+                customers = kpi?.Customers ?? 0
             });
         }
+
+        [HttpPut]
+        public async Task<IActionResult> updateKpis([FromBody] UpdatedKpis kpis)
+        {
+            try
+            {
+                await _nextjstestContext.Kpis.ExecuteDeleteAsync();
+                await _nextjstestContext.Kpis.AddAsync(new Kpi
+                {
+                    TotalBilled = kpis.totalBilled,
+                    Collected = kpis.collected,
+                    Outstanding = kpis.outstanding,
+                    Customers = kpis.customers
+                });
+                await _nextjstestContext.SaveChangesAsync();
+            }
+            catch
+            {
+                return StatusCode(500);
+            }
+
+            return Ok();
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> updateRevenue([FromBody] UpdatedRevenue revenue)
+        {
+            try
+            {
+                Revenue? existing = await _nextjstestContext.Revenues.FirstOrDefaultAsync(r => r.Month == revenue.month);
+                if (existing == null)
+                {
+                    await _nextjstestContext.Revenues.AddAsync(new Revenue
+                    {
+                        Month = revenue.month,
+                        Revenue1 = revenue.revenue
+                    });
+                }
+                else
+                {
+                    existing.Revenue1 = revenue.revenue;
+                }
+
+                await _nextjstestContext.SaveChangesAsync();
+            }
+            catch
+            {
+                return StatusCode(500);
+            }
+
+            return Ok();
+        }
+    }
+
+    public class UpdatedKpis
+    {
+        public int totalBilled { get; set; }
+        public int collected { get; set; }
+        public int outstanding { get; set; }
+        public int customers { get; set; }
+    }
+
+    public class UpdatedRevenue
+    {
+        public string month { get; set; } = null!;
+        public int revenue { get; set; }
     }
 }

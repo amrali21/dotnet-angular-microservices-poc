@@ -62,19 +62,14 @@ export class HomeComponent implements OnInit {
     this.revenue().reduce((sum, r) => sum + (Number(r.revenue) || 0), 0)
   );
 
-  readonly paidCents = computed(() => Number(this.cardData()?.invoiceStatus?.paid) || 0);
-  readonly pendingCents = computed(() => Number(this.cardData()?.invoiceStatus?.pending) || 0);
-  readonly billedCents = computed(() => this.paidCents() + this.pendingCents());
+  readonly paidCents = computed(() => Number(this.cardData()?.collected) || 0);
+  readonly pendingCents = computed(() => Number(this.cardData()?.outstanding) || 0);
+  readonly billedCents = computed(() => Number(this.cardData()?.totalBilled) || 0);
 
   /** Share of billed value already collected — drives the meter and its label. */
   readonly collectedShare = computed(() => {
     const billed = this.billedCents();
     return billed === 0 ? 0 : Math.round((this.paidCents() / billed) * 100);
-  });
-
-  readonly averageInvoiceCents = computed(() => {
-    const count = this.cardData()?.invoiceCount ?? 0;
-    return count === 0 ? 0 : Math.round(this.billedCents() / count);
   });
 
   /** Axis top, rounded up to a readable step so tick labels stay whole. */

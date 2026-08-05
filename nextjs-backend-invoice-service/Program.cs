@@ -2,8 +2,13 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using nextjs_backend.Grpc;
 using nextjs_backend.Models;
 using Steeltoe.Discovery.Client;
+
+// net6.0's HttpClient refuses cleartext (non-TLS) HTTP/2 by default; cust-service's
+// gRPC endpoint is plain http:// inside the docker/k8s network, so opt in explicitly.
+AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +37,10 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<nextjstestContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddDiscoveryClient(builder.Configuration);
+builder.Services.AddGrpcClient<CustomerLookup.CustomerLookupClient>(options =>
+{
+    options.Address = new Uri(builder.Configuration["GrpcServices:CustomerService"]!);
+});
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

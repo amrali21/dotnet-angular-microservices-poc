@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using nextjs_backend.Grpc;
 using nextjs_backend.Models;
 using nextjs_backend.Models.FrontEnd;
 
@@ -15,244 +16,77 @@ namespace nextjs_backend.Controllers
     public class InvoiceController : ControllerBase
     {
         nextjstestContext _nextjstestContext;
-        public InvoiceController(nextjstestContext nextjstestContext)
+        CustomerLookup.CustomerLookupClient _customerLookup;
+        public InvoiceController(nextjstestContext nextjstestContext, CustomerLookup.CustomerLookupClient customerLookup)
         {
             _nextjstestContext = nextjstestContext;
+            _customerLookup = customerLookup;
         }
 
         [HttpGet]
-        public async Task<IActionResult> getLatestInvoices()
+        public async Task<IActionResult> fetchFilteredInvoices(string? query, int itemsPerPage, int offset)
         {
-            var output = await (from invoice in _nextjstestContext.Invoices
-                                join customer in _nextjstestContext.Customers on
-                                invoice.CustomerId equals customer.Id
-                                orderby invoice.Date
-                                select new
-                                {
-                                    amount = invoice.Amount,
-                                    name = customer.Name,
-                                    image_url = customer.ImageUrl,
-                                    email = customer.Email,
-                                    id = invoice.Id
-                                }).Take(5).ToListAsync();
+            CustomerListReply customerList = await _customerLookup.ListCustomersAsync(new Empty());
+            Dictionary<string, CustomerReply> customersById = customerList.Customers.ToDictionary(c => c.Id);
 
-            return Ok(output);
-        }
+            var invoices = await _nextjstestContext.Invoices.ToListAsync();
 
-        [HttpGet]
-        public async Task<IActionResult> getRevenue()
-        {
-            var output = await _nextjstestContext.Revenues.Select(r => new
-            {
-                month = r.Month,
-                revenue = r.Revenue1
-            }).ToListAsync();
+            var output = (from i in invoices
+                          where customersById.ContainsKey(i.CustomerId)
+                          let c = customersById[i.CustomerId]
+                          where query == null || (c.Name.Contains(query) || c.Email.Contains(query))
+                          select new
+                          {
+                              id = i.Id,
+                              amount = i.Amount,
+                              date = i.Date,
+                              status = i.Status,
+                              name = c.Name,
+                              email = c.Email,
+                              image_url = c.ImageUrl
+                          }).ToList();
 
-            return Ok(output);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> getCardData()
-        {
             return Ok(new
             {
-                invoiceCount = _nextjstestContext.Invoices.Count(),
-                customerCount = _nextjstestContext.Customers.Count(),
-                invoiceStatus = new
-                {
-                    paid = _nextjstestContext.Invoices.Where(i => i.Status == "paid").Sum(i => i.Amount),
-                    pending = _nextjstestContext.Invoices.Where(i => i.Status == "pending").Sum(i => i.Amount),
-                }
+                data = output.Skip(offset).Take(itemsPerPage).ToList(),
+                count = output.Count
             });
         }
 
         [HttpGet]
-        public async Task<IActionResult> fetchFilteredInvoices(string? query, int itemsPerPage, int offset) // linq error
+        public async Task<IActionResult> fetchInvoicesPages(string? query)
         {
-            var output =  (from i in _nextjstestContext.Invoices
-             join c in _nextjstestContext.Customers
-             on i.CustomerId equals c.Id
-             where query == null || (c.Name.Contains(query) || c.Email.Contains(query) /*|| i.Amount.ToString().Contains(query) ||
-             i.Date.ToString().Contains(query) || i.Status.ToString().Contains(query)*/)
-             select new
-             {
-                 id = i.Id,
-                 amount = i.Amount,
-                 date = i.Date,
-                 status = i.Status,
-                 name = c.Name,
-                 email = c.Email,
-                 image_url = c.ImageUrl
-             }).AsQueryable();
+            CustomerListReply customerList = await _customerLookup.ListCustomersAsync(new Empty());
+            Dictionary<string, CustomerReply> customersById = customerList.Customers.ToDictionary(c => c.Id);
 
-            return Ok(
-            new
-            {
-                data = await output.Skip(offset).Take(itemsPerPage).ToListAsync(),
-                count = output.Count()
-            });
-        }
+            var invoices = await _nextjstestContext.Invoices.ToListAsync();
 
-        [HttpGet]
-        public async Task<IActionResult> fetchInvoicesPages(string? query) // linq error
-        {
-            var output = await (from i in _nextjstestContext.Invoices
-                                join c in _nextjstestContext.Customers
-                                on i.CustomerId equals c.Id             
-                                where query == null || (c.Name.Contains(query) || c.Email.Contains(query) /*|| (string)(object)i.Amount.Contains(query) ||
-                                i.Date.ToString().Contains(query) || i.Status.ToString().Contains(query)*/)
-                                select i.Id).CountAsync();
+            int count = (from i in invoices
+                         where customersById.ContainsKey(i.CustomerId)
+                         let c = customersById[i.CustomerId]
+                         where query == null || (c.Name.Contains(query) || c.Email.Contains(query))
+                         select i.Id).Count();
 
-            return Ok(output);
+            return Ok(count);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> fetchInvoiceById(string id)
         {
-            var output = await (from i in _nextjstestContext.Invoices
-                                join c in _nextjstestContext.Customers
-                                on i.CustomerId equals c.Id
-                                where i.Id == id
-                                select new
-                                {
-                                    id = i.Id,
-                                    name = c.Name,
-                                    customer_id = i.CustomerId,
-                                    amount = i.Amount,
-                                    status = i.Status
-                                }).FirstOrDefaultAsync();
+            Invoice? invoice = await _nextjstestContext.Invoices.FirstOrDefaultAsync(i => i.Id == id);
+            if (invoice == null)
+                return NotFound();
 
-            return Ok(output);
-        }
+            CustomerReply customer = await _customerLookup.GetCustomerByIdAsync(new CustomerIdRequest { Id = invoice.CustomerId });
 
-        [HttpGet]
-        public async Task<IActionResult> fetchCustomers()
-        {
-            var output = await (from c in _nextjstestContext.Customers
-                                orderby c.Name
-                                select new
-                                {
-                                    id = c.Id,
-                                    name = c.Name,
-                                    email = c.Email,
-                                    image_url = c.ImageUrl
-                                }).ToListAsync();               
-
-            return Ok(output);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> fetchCustomerByID(string id)
-        {
-            var output = await (from c in _nextjstestContext.Customers
-                                orderby c.Name
-                                where c.Id == id
-                                select new
-                                {
-                                    id = c.Id,
-                                    name = c.Name,
-                                    email = c.Email,
-                                    image_url = c.ImageUrl
-                                }).FirstOrDefaultAsync();
-
-            return Ok(output);
-        }
-
-        [HttpPut]
-        public async Task<IActionResult> updateCustomer(/*[FromBody] UpdatedInvoice invoice*/)
-        {
-            return Ok();
-            UpdatedInvoice invoice;
-            try
+            return Ok(new
             {
-                using StreamReader streamReader = new(Request.Body);
-                invoice = JsonConvert.DeserializeObject<UpdatedInvoice>(await streamReader.ReadToEndAsync());
-
-                if (invoice == null)
-                    return BadRequest("Can't deserialize");
-            }
-            catch
-            {
-                return BadRequest("Couldn't parse formula");
-            }
-            Invoice? oldInvoice = await _nextjstestContext.Invoices.FirstOrDefaultAsync(i => i.Id == invoice.id);
-            try
-            {
-                oldInvoice.CustomerId = invoice.customerId;
-                oldInvoice.Amount = invoice.amount;
-                oldInvoice.Status = invoice.status;
-
-                await _nextjstestContext.SaveChangesAsync();
-            }
-            catch
-            {
-                return StatusCode(500);
-            }
-
-            return Ok();
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> fetchFilteredCustomers(string? query, int itemsPerPage, int offset)
-        {
-            var output = (from c in _nextjstestContext.Customers
-                          orderby c.Name
-                          where ((query == "" || query == null) || c.Name.StartsWith(query))
-                          select new
-                          {
-                              id = c.Id,
-                              name = c.Name,
-                              email = c.Email,
-                              image_url = c.ImageUrl
-                          }).AsQueryable();
-
-            return Ok(
-                new
-                {
-                    data = await output.Skip(offset).Take(itemsPerPage).ToListAsync(),
-                    count = output.Count()
-                }
-            );
-
-
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> fetchCustomerPages(string? query) // linq error
-        {
-            var output = await (from c in _nextjstestContext.Customers
-                                orderby c.Name
-                                where ((query == "" || query == null) || c.Name.StartsWith(query))
-                                select new
-                                {
-                                    id = c.Id,
-                                    name = c.Name,
-                                    email = c.Email,
-                                    image_url = c.ImageUrl
-                                }).CountAsync();
-
-            return Ok(output);
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> deleteCustomer(string id)
-        {
-            if (!await _nextjstestContext.Customers.AnyAsync(i => i.Id == id))
-                return BadRequest("invoice not found");
-
-            Customer customer = await _nextjstestContext.Customers.FirstAsync(i => i.Id == id);
-
-            try
-            {
-                _nextjstestContext.Customers.Remove(customer);
-                await _nextjstestContext.SaveChangesAsync();
-            }
-            catch
-            {
-                return StatusCode(500);
-            }
-
-            return Ok();
+                id = invoice.Id,
+                name = customer.Found ? customer.Name : null,
+                customer_id = invoice.CustomerId,
+                amount = invoice.Amount,
+                status = invoice.Status
+            });
         }
 
         [HttpPost]

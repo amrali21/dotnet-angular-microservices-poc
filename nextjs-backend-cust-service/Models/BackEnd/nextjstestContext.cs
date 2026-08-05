@@ -18,8 +18,6 @@ namespace nextjs_backend_cust_service.Models
         }
 
         public virtual DbSet<Customer> Customers { get; set; } = null!;
-        public virtual DbSet<Invoice> Invoices { get; set; } = null!;
-        public virtual DbSet<Revenue> Revenues { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -50,49 +48,6 @@ namespace nextjs_backend_cust_service.Models
                     .HasMaxLength(255)
                     .IsUnicode(false)
                     .HasColumnName("name");
-            });
-
-            modelBuilder.Entity<Invoice>(entity =>
-            {
-                entity.ToTable("invoices");
-
-                entity.Property(e => e.Id)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("id");
-
-                entity.Property(e => e.Amount).HasColumnName("amount");
-
-                entity.Property(e => e.CustomerId)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("customer_id");
-
-                entity.Property(e => e.Date)
-                    .HasColumnType("date")
-                    .HasColumnName("date");
-
-                entity.Property(e => e.Status)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("status");
-            });
-
-            modelBuilder.Entity<Revenue>(entity =>
-            {
-                entity.HasKey(e => new { e.Month, e.Revenue1 });
-
-                entity.ToTable("revenue");
-
-                entity.HasIndex(e => e.Month, "UQ__revenue__0DD75472E02AC0B3")
-                    .IsUnique();
-
-                entity.Property(e => e.Month)
-                    .HasMaxLength(4)
-                    .IsUnicode(false)
-                    .HasColumnName("month");
-
-                entity.Property(e => e.Revenue1).HasColumnName("revenue");
             });
 
             modelBuilder.Seed();

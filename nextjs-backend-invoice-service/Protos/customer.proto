@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option csharp_namespace = "nextjs_backend.Grpc";
+
+package customer;
+
+service CustomerLookup {
+  rpc GetCustomerById (CustomerIdRequest) returns (CustomerReply);
+  rpc ListCustomers (Empty) returns (CustomerListReply);
+}
+
+message CustomerIdRequest {
+  string id = 1;
+}
+
+message CustomerReply {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  string image_url = 4;
+  bool found = 5;
+}
+
+message CustomerListReply {
+  repeated CustomerReply customers = 1;
+}
+
+message Empty {
+}

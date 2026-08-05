@@ -39,7 +39,6 @@
     <article class="surface-card tile">
       <p class="tile__label"><i class="pi pi-wallet"></i> Total billed</p>
       <p class="tile__value tabular">{{ money(billedCents()) }}</p>
-      <p class="tile__foot">{{ cardData()?.invoiceCount ?? 0 }} invoices · avg {{ money(averageInvoiceCents()) }}</p>
     </article>
 
     <article class="surface-card tile">
@@ -62,7 +61,7 @@
 
     <article class="surface-card tile">
       <p class="tile__label"><i class="pi pi-users"></i> Customers</p>
-      <p class="tile__value tabular">{{ cardData()?.customerCount ?? 0 }}</p>
+      <p class="tile__value tabular">{{ cardData()?.customers ?? 0 }}</p>
       <p class="tile__foot"><a routerLink="/customers">Manage customers <i class="pi pi-arrow-right"></i></a></p>
     </article>
     }

@@ -48,12 +48,10 @@ export type RevenuePoint = {
 }
 
 export type KpiCardData = {
-    invoiceCount: number;
-    customerCount: number;
-    invoiceStatus: {
-        paid: number;
-        pending: number;
-    };
+    totalBilled: number;
+    collected: number;
+    outstanding: number;
+    customers: number;
 }
 
 export type AuthUser = {

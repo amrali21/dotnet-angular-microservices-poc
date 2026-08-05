@@ -17,9 +17,7 @@ namespace nextjs_backend.Models
         {
         }
 
-        public virtual DbSet<Customer> Customers { get; set; } = null!;
         public virtual DbSet<Invoice> Invoices { get; set; } = null!;
-        public virtual DbSet<Revenue> Revenues { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -27,31 +25,6 @@ namespace nextjs_backend.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Customer>(entity =>
-            {
-                entity.ToTable("customers");
-
-                entity.Property(e => e.Id)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("id");
-
-                entity.Property(e => e.Email)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("email");
-
-                entity.Property(e => e.ImageUrl)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("image_url");
-
-                entity.Property(e => e.Name)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("name");
-            });
-
             modelBuilder.Entity<Invoice>(entity =>
             {
                 entity.ToTable("invoices");
@@ -76,23 +49,6 @@ namespace nextjs_backend.Models
                     .HasMaxLength(255)
                     .IsUnicode(false)
                     .HasColumnName("status");
-            });
-
-            modelBuilder.Entity<Revenue>(entity =>
-            {
-                entity.HasKey(e => new { e.Month, e.Revenue1 });
-
-                entity.ToTable("revenue");
-
-                entity.HasIndex(e => e.Month, "UQ__revenue__0DD75472E02AC0B3")
-                    .IsUnique();
-
-                entity.Property(e => e.Month)
-                    .HasMaxLength(4)
-                    .IsUnicode(false)
-                    .HasColumnName("month");
-
-                entity.Property(e => e.Revenue1).HasColumnName("revenue");
             });
 
             modelBuilder.Seed();

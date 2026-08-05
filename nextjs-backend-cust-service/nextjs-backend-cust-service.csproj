@@ -18,6 +18,11 @@
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Steeltoe.Discovery.Eureka" Version="3.2.8" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.66.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="Protos\customer.proto" GrpcServices="Server" />
   </ItemGroup>
 
 </Project>

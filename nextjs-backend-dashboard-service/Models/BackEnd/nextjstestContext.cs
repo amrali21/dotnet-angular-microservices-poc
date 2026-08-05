@@ -17,9 +17,8 @@ namespace nextjs_backend_dashboard_service.Models
         {
         }
 
-        public virtual DbSet<Customer> Customers { get; set; } = null!;
-        public virtual DbSet<Invoice> Invoices { get; set; } = null!;
         public virtual DbSet<Revenue> Revenues { get; set; } = null!;
+        public virtual DbSet<Kpi> Kpis { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -27,57 +26,6 @@ namespace nextjs_backend_dashboard_service.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Customer>(entity =>
-            {
-                entity.ToTable("customers");
-
-                entity.Property(e => e.Id)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("id");
-
-                entity.Property(e => e.Email)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("email");
-
-                entity.Property(e => e.ImageUrl)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("image_url");
-
-                entity.Property(e => e.Name)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("name");
-            });
-
-            modelBuilder.Entity<Invoice>(entity =>
-            {
-                entity.ToTable("invoices");
-
-                entity.Property(e => e.Id)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("id");
-
-                entity.Property(e => e.Amount).HasColumnName("amount");
-
-                entity.Property(e => e.CustomerId)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("customer_id");
-
-                entity.Property(e => e.Date)
-                    .HasColumnType("date")
-                    .HasColumnName("date");
-
-                entity.Property(e => e.Status)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("status");
-            });
-
             modelBuilder.Entity<Revenue>(entity =>
             {
                 entity.HasKey(e => new { e.Month, e.Revenue1 });
@@ -93,6 +41,19 @@ namespace nextjs_backend_dashboard_service.Models
                     .HasColumnName("month");
 
                 entity.Property(e => e.Revenue1).HasColumnName("revenue");
+            });
+
+            // kpis has no primary key by design — it's a single-row snapshot,
+            // replaced wholesale (delete-all-then-insert) by KPI/updateKpis.
+            modelBuilder.Entity<Kpi>(entity =>
+            {
+                entity.HasNoKey();
+                entity.ToTable("kpis");
+
+                entity.Property(e => e.TotalBilled).HasColumnName("totalbilled");
+                entity.Property(e => e.Collected).HasColumnName("collected");
+                entity.Property(e => e.Outstanding).HasColumnName("outstanding");
+                entity.Property(e => e.Customers).HasColumnName("customers");
             });
 
             modelBuilder.Seed();
