@@ -23,9 +23,11 @@ namespace nextjs_backend_cust_service.Services
             return ToReply(customer);
         }
 
-        public override async Task<CustomerListReply> ListCustomers(Empty request, ServerCallContext context)
+        public override async Task<CustomerListReply> GetCustomersByIds(CustomerIdListRequest request, ServerCallContext context)
         {
-            List<Customer> customers = await _context.Customers.ToListAsync();
+            List<Customer> customers = await _context.Customers
+                .Where(c => request.Ids.Contains(c.Id))
+                .ToListAsync();
 
             CustomerListReply reply = new();
             reply.Customers.AddRange(customers.Select(ToReply));

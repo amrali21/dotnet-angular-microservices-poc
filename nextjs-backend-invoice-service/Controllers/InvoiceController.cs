@@ -30,10 +30,12 @@ namespace nextjs_backend.Controllers
         [HttpGet]
         public async Task<IActionResult> fetchFilteredInvoices(string? query, int itemsPerPage, int offset)
         {
-            CustomerListReply customerList = await _customerLookup.ListCustomersAsync(new Empty());
-            Dictionary<string, CustomerReply> customersById = customerList.Customers.ToDictionary(c => c.Id);
-
             var invoices = await _nextjstestContext.Invoices.ToListAsync();
+
+            CustomerIdListRequest idRequest = new();
+            idRequest.Ids.AddRange(invoices.Select(i => i.CustomerId).Distinct());
+            CustomerListReply customerList = await _customerLookup.GetCustomersByIdsAsync(idRequest);
+            Dictionary<string, CustomerReply> customersById = customerList.Customers.ToDictionary(c => c.Id);
 
             var output = (from i in invoices
                           where customersById.ContainsKey(i.CustomerId)
@@ -60,10 +62,12 @@ namespace nextjs_backend.Controllers
         [HttpGet]
         public async Task<IActionResult> fetchInvoicesPages(string? query)
         {
-            CustomerListReply customerList = await _customerLookup.ListCustomersAsync(new Empty());
-            Dictionary<string, CustomerReply> customersById = customerList.Customers.ToDictionary(c => c.Id);
-
             var invoices = await _nextjstestContext.Invoices.ToListAsync();
+
+            CustomerIdListRequest idRequest = new();
+            idRequest.Ids.AddRange(invoices.Select(i => i.CustomerId).Distinct());
+            CustomerListReply customerList = await _customerLookup.GetCustomersByIdsAsync(idRequest);
+            Dictionary<string, CustomerReply> customersById = customerList.Customers.ToDictionary(c => c.Id);
 
             int count = (from i in invoices
                          where customersById.ContainsKey(i.CustomerId)
@@ -96,6 +100,10 @@ namespace nextjs_backend.Controllers
         [HttpPost]
         public async Task<IActionResult> insertInvoice([FromBody] InsertedInvoice invoice)
         {
+            CustomerReply customer = await _customerLookup.GetCustomerByIdAsync(new CustomerIdRequest { Id = invoice.customerId });
+            if (!customer.Found)
+                return BadRequest("customer not found");
+
             Invoice newInvoice = new()
             {
                 Id = _nextjstestContext.Invoices.Max(i => i.Id) + 1,

@@ -6,11 +6,15 @@ package customer;
 
 service CustomerLookup {
   rpc GetCustomerById (CustomerIdRequest) returns (CustomerReply);
-  rpc ListCustomers (Empty) returns (CustomerListReply);
+  rpc GetCustomersByIds (CustomerIdListRequest) returns (CustomerListReply);
 }
 
 message CustomerIdRequest {
   string id = 1;
+}
+
+message CustomerIdListRequest {
+  repeated string ids = 1;
 }
 
 message CustomerReply {
@@ -23,7 +27,4 @@ message CustomerReply {
 
 message CustomerListReply {
   repeated CustomerReply customers = 1;
-}
-
-message Empty {
 }
