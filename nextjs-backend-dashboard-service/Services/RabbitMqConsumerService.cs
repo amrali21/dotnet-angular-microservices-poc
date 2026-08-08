@@ -35,7 +35,20 @@ namespace nextjs_backend_dashboard_service.Services
                 VirtualHost = _configuration["RabbitMQ:VirtualHost"] ?? "/"
             };
 
-            _connection = await factory.CreateConnectionAsync(stoppingToken);
+            while (true)
+            {
+                try
+                {
+                    _connection = await factory.CreateConnectionAsync(stoppingToken);
+                    break;
+                }
+                catch (Exception ex) when (!stoppingToken.IsCancellationRequested)
+                {
+                    _logger.LogWarning(ex, "RabbitMQ not reachable yet, retrying in 5s");
+                    await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                }
+            }
+
             _channel = await _connection.CreateChannelAsync(cancellationToken: stoppingToken);
 
             await _channel.ExchangeDeclareAsync(ExchangeName, ExchangeType.Topic, durable: true, cancellationToken: stoppingToken);
