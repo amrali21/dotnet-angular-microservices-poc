@@ -19,3 +19,7 @@ data:
   eureka__client__enabled: "false"
   eureka__client__shouldRegisterWithEureka: "false"
   eureka__client__shouldFetchRegistry: "false"
+  # RabbitMQ broker address (non-secret) — credentials come from rabbitmq-secret.
+  RabbitMQ__HostName: "rabbitmq"
+  RabbitMQ__Port: "5672"
+  RabbitMQ__VirtualHost: "/"

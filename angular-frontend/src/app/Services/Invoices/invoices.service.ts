@@ -33,13 +33,25 @@ export class InvoicesService {
     id: new FormControl(''),
     name: new FormControl({ value: '', disabled: true }),
     email: new FormControl({ value: '', disabled: true }),
-    amount: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
+    amount: new FormControl<number | null>({ value: null, disabled: true }),
     status: new FormControl('pending', Validators.required),
   });
 
   /** The invoice currently open in the edit screen, for the summary panel. */
   currentInvoice = signal<LatestInvoice | null>(null);
   saving = signal<boolean>(false);
+
+  /**
+   * The create form is separate from invoiceForm: creating picks a customer and
+   * an amount (fixed for the invoice's lifetime), editing only ever touches status.
+   */
+  createInvoiceForm: FormGroup = new FormGroup({
+    customerId: new FormControl('', Validators.required),
+    amount: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
+    status: new FormControl('pending', Validators.required),
+  });
+
+  creating = signal<boolean>(false);
 
   load(Filter: InvoiceFilter, Callback: () => void): void {
     this.loading.set(true);
@@ -112,12 +124,10 @@ export class InvoicesService {
     const headers = new HttpHeaders().set('Accept', 'application/json');
     const form = this.invoiceForm.getRawValue();
 
+    // Amount is fixed at creation — only status is editable here.
     const invoice = {
       id: form.id,
-      // back to the cents the API stores
-      amount: Math.round(Number(form.amount) * 100),
       status: form.status,
-      customerId: '',
     };
 
     this.saving.set(true);
@@ -131,6 +141,39 @@ export class InvoicesService {
       error: () => {
         this.saving.set(false);
         this.error.set('Saving the invoice failed. Please try again.');
+      },
+    });
+  }
+
+  createInvoice(): void {
+    if (this.createInvoiceForm.invalid) {
+      this.createInvoiceForm.markAllAsTouched();
+      return;
+    }
+
+    const url = `${ACTION_URL}/InvoiceGW/Invoice/insertInvoice`;
+    const headers = new HttpHeaders().set('Accept', 'application/json');
+    const form = this.createInvoiceForm.getRawValue();
+
+    const invoice = {
+      customerId: form.customerId,
+      // dollars in the form -> cents the API stores
+      amount: Math.round(Number(form.amount) * 100),
+      status: form.status,
+    };
+
+    this.creating.set(true);
+    this.error.set(null);
+
+    this.http.post(url, invoice, { headers }).subscribe({
+      next: () => {
+        this.creating.set(false);
+        this.createInvoiceForm.reset({ customerId: '', amount: null, status: 'pending' });
+        this.router.navigate(['invoices']);
+      },
+      error: () => {
+        this.creating.set(false);
+        this.error.set('Creating the invoice failed. Please try again.');
       },
     });
   }

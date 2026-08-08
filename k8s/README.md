@@ -14,6 +14,10 @@ design — the same services as `docker-compose.yml`, but:
   the gateway and the 3 downstream services validate them independently using a
   shared signing key (Secret: `jwt-secret`).
 - **Autoscaling** via HPAs on CPU.
+- **RabbitMQ** (`05-rabbitmq.yaml`) is the async link between invoice/cust-service
+  (publishers) and dashboard-service (consumer), reachable as `rabbitmq:5672`.
+  Credentials live in `rabbitmq-secret`; the broker address is in
+  `02-common-config.yaml`.
 
 ```
                     Ingress (myapp.local)  ── only public door
@@ -36,6 +40,8 @@ design — the same services as `docker-compose.yml`, but:
 | `02-common-config.yaml`       | Shared env: `ASPNETCORE_ENVIRONMENT=Production` + Eureka-off flags |
 | `03-gateway-ocelot-config.yaml`| Eureka-free `ocelot.json`, mounted over the gateway image |
 | `04-jwt-secret.yaml`           | JWT signing key/issuer/audience — **edit before deploying** |
+| `04-rabbitmq-secret.yaml`      | RabbitMQ broker credentials — **edit before deploying** |
+| `05-rabbitmq.yaml`             | RabbitMQ broker: Deployment + ClusterIP Service |
 | `10/11/12-*-service.yaml`      | The 3 .NET services: Deployment + ClusterIP Service |
 | `13-api-gateway.yaml`          | Ocelot gateway: Deployment + ClusterIP Service |
 | `14-angular-frontend.yaml`     | Angular SPA (nginx): Deployment + ClusterIP Service |
@@ -106,10 +112,11 @@ docker compose -f docker-compose.yml -f docker-compose.push.yml build
 > minikube image load xamrxxx/angular-frontend:latest
 > ```
 
-## 2. Set the DB and JWT secrets
+## 2. Set the DB, JWT, and RabbitMQ secrets
 
-`01-db-secret.yaml` and `04-jwt-secret.yaml` are **gitignored** (they hold real
-credentials). Create them from the committed templates:
+`01-db-secret.yaml`, `04-jwt-secret.yaml`, and `04-rabbitmq-secret.yaml` are
+**gitignored** (they hold real credentials). Create them from the committed
+templates:
 
 ```bash
 cp k8s/01-db-secret.example.yaml k8s/01-db-secret.yaml
@@ -117,11 +124,14 @@ cp k8s/01-db-secret.example.yaml k8s/01-db-secret.yaml
 
 cp k8s/04-jwt-secret.example.yaml k8s/04-jwt-secret.yaml
 # edit k8s/04-jwt-secret.yaml -> set a real random Jwt__Key, e.g.: openssl rand -base64 64
+
+cp k8s/04-rabbitmq-secret.example.yaml k8s/04-rabbitmq-secret.yaml
+# edit k8s/04-rabbitmq-secret.yaml -> set real RABBITMQ_DEFAULT_PASS / RabbitMQ__Password
 ```
 
-`kustomization.yaml` references both files, so they must exist locally before
-`kubectl apply -k`. For real environments prefer `kubectl create secret` or an
-external-secrets operator over a file on disk.
+`kustomization.yaml` references all three files, so they must exist locally
+before `kubectl apply -k`. For real environments prefer `kubectl create secret`
+or an external-secrets operator over a file on disk.
 
 > **Troubleshooting**: `auth-service`, `api-gateway`, `invoice-service`,
 > `cust-service`, and `dashboard-service` all read `Jwt__Key`/`Jwt__Issuer`/

@@ -35,12 +35,6 @@ export class InvoicesEditComponent implements OnInit {
     return this.invoiceService.invoiceForm;
   }
 
-  /** Only complain once the user has actually interacted with the field. */
-  showError(control: string): boolean {
-    const field = this.invoiceForm.get(control);
-    return !!field && field.invalid && (field.dirty || field.touched);
-  }
-
   ngOnInit(): void {
     this.ID = this.route.snapshot.paramMap.get('id');
     this.invoiceService.searchById(this.ID);

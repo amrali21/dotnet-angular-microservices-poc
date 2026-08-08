@@ -33,6 +33,8 @@ spec:
                 name: invoice-db-secret
             - secretRef:
                 name: jwt-secret
+            - secretRef:
+                name: rabbitmq-secret
           resources:
             requests:
               cpu: "100m"

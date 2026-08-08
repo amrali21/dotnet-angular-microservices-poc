@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using nextjs_backend.Grpc;
 using nextjs_backend.Models;
+using nextjs_backend.Services;
 using Steeltoe.Discovery.Client;
 
 // net6.0's HttpClient refuses cleartext (non-TLS) HTTP/2 by default; cust-service's
@@ -41,6 +42,7 @@ builder.Services.AddGrpcClient<CustomerLookup.CustomerLookupClient>(options =>
 {
     options.Address = new Uri(builder.Configuration["GrpcServices:CustomerService"]!);
 });
+builder.Services.AddSingleton<RabbitMqPublisher>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

@@ -28,32 +28,37 @@ namespace nextjs_backend_dashboard_service.Models
         {
             modelBuilder.Entity<Revenue>(entity =>
             {
-                entity.HasKey(e => new { e.Month, e.Revenue1 });
+                entity.HasKey(e => new { e.Month, e.Year });
 
                 entity.ToTable("revenue");
-
-                entity.HasIndex(e => e.Month, "UQ__revenue__0DD75472E02AC0B3")
-                    .IsUnique();
 
                 entity.Property(e => e.Month)
                     .HasMaxLength(4)
                     .IsUnicode(false)
                     .HasColumnName("month");
 
+                entity.Property(e => e.Year).HasColumnName("year");
+
                 entity.Property(e => e.Revenue1).HasColumnName("revenue");
             });
 
-            // kpis has no primary key by design — it's a single-row snapshot,
-            // replaced wholesale (delete-all-then-insert) by KPI/updateKpis.
+            // One row per named metric (Total Billed / Collected / Outstanding /
+            // Customers), seeded ahead of time by db/seed data - dashbaord.sql.
+            // KpiService updates kpivalue in place via atomic ExecuteUpdateAsync
+            // calls keyed on ID/KpiName, not delete-then-insert.
             modelBuilder.Entity<Kpi>(entity =>
             {
-                entity.HasNoKey();
+                entity.HasKey(e => e.ID);
                 entity.ToTable("kpis");
 
-                entity.Property(e => e.TotalBilled).HasColumnName("totalbilled");
-                entity.Property(e => e.Collected).HasColumnName("collected");
-                entity.Property(e => e.Outstanding).HasColumnName("outstanding");
-                entity.Property(e => e.Customers).HasColumnName("customers");
+                entity.Property(e => e.ID).HasColumnName("ID");
+                entity.Property(e => e.KpiName)
+                    .HasMaxLength(200)
+                    .HasColumnName("kpiname");
+                entity.Property(e => e.KpiDesc)
+                    .HasMaxLength(2000)
+                    .HasColumnName("kpidesc");
+                entity.Property(e => e.KpiValue).HasColumnName("kpivalue");
             });
 
             modelBuilder.Seed();

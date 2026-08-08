@@ -11,6 +11,8 @@ resources:
   - 02-common-config.yaml
   - 03-gateway-ocelot-config.yaml
   - 04-jwt-secret.yaml
+  - 04-rabbitmq-secret.yaml
+  - 05-rabbitmq.yaml
   - 10-invoice-service.yaml
   - 11-cust-service.yaml
   - 12-dashboard-service.yaml

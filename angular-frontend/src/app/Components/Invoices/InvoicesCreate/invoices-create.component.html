@@ -1,0 +1,105 @@
+<div class="page page--narrow">
+
+  <a class="back" routerLink="/invoices"><i class="pi pi-arrow-left"></i> Back to invoices</a>
+
+  <header class="page-head">
+    <div>
+      <h1 class="page-head__title">New invoice</h1>
+      <p class="page-head__sub">Bill a customer for a fixed amount.</p>
+    </div>
+    <div class="page-head__tools">
+      <span class="service-chip">invoice-service</span>
+    </div>
+  </header>
+
+  @if (error()) {
+  <div class="banner banner--error" role="alert">
+    <i class="pi pi-exclamation-triangle"></i>
+    <div>
+      <strong>Something went wrong</strong>
+      <p>{{ error() }}</p>
+    </div>
+  </div>
+  }
+
+  <section class="surface-card">
+    <div class="card-head">
+      <div>
+        <h2>Invoice details</h2>
+        <p class="card-head__sub">Amount is fixed once created — only the status can change later.</p>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
+
+        <div class="field">
+          <label for="customerId">Customer</label>
+          <p-dropdown inputId="customerId" [options]="customers()" formControlName="customerId" optionLabel="name"
+            optionValue="id" placeholder="Select a customer" filter="true" filterBy="name,email"
+            [class.p-invalid]="showError('customerId')" styleClass="w-full">
+            <ng-template pTemplate="selectedItem" let-selected>
+              <div class="who">
+                <span class="avatar" [style.background]="colorFor(selected.name)">{{ initialsOf(selected.name) }}</span>
+                <span class="who__text">
+                  <strong>{{ selected.name }}</strong>
+                </span>
+              </div>
+            </ng-template>
+            <ng-template let-customer pTemplate="item">
+              <div class="who">
+                <span class="avatar" [style.background]="colorFor(customer.name)">{{ initialsOf(customer.name) }}</span>
+                <span class="who__text">
+                  <strong>{{ customer.name }}</strong>
+                  <small>{{ customer.email }}</small>
+                </span>
+              </div>
+            </ng-template>
+          </p-dropdown>
+          @if (showError('customerId')) {
+          <small class="field__error"><i class="pi pi-exclamation-circle"></i> Select a customer.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="amount">Amount (USD)</label>
+          <span class="p-input-icon-left">
+            <i class="pi pi-dollar"></i>
+            <input id="amount" type="number" step="0.01" min="0.01" pInputText formControlName="amount"
+              [class.p-invalid]="showError('amount')" />
+          </span>
+          @if (showError('amount')) {
+          <small class="field__error"><i class="pi pi-exclamation-circle"></i> Enter an amount greater than 0.</small>
+          } @else {
+          <small class="field__hint">Stored in cents by the API; entered here in dollars.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="status">Status</label>
+          <p-dropdown inputId="status" [options]="statuses" formControlName="status" optionLabel="label"
+            optionValue="value" placeholder="Select a status" styleClass="w-full">
+            <ng-template pTemplate="selectedItem" let-selected>
+              <span class="status-badge" [ngClass]="'status-badge--' + selected.value">
+                <i class="pi" [ngClass]="selected.icon"></i> {{ selected.label }}
+              </span>
+            </ng-template>
+            <ng-template let-option pTemplate="item">
+              <span class="status-badge" [ngClass]="'status-badge--' + option.value">
+                <i class="pi" [ngClass]="option.icon"></i> {{ option.label }}
+              </span>
+            </ng-template>
+          </p-dropdown>
+        </div>
+
+        <div class="form__actions">
+          <a class="btn btn--ghost" routerLink="/invoices">Cancel</a>
+          <button type="submit" class="btn btn--primary" [disabled]="creating()">
+            <i class="pi" [ngClass]="creating() ? 'pi-spin pi-spinner' : 'pi-plus'"></i>
+            {{ creating() ? 'Creating…' : 'Create invoice' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>

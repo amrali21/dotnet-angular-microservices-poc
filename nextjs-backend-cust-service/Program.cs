@@ -25,6 +25,7 @@ builder.Services.AddDbContext<nextjstestContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddDiscoveryClient(builder.Configuration);
 builder.Services.AddOpenApi();
+builder.Services.AddSingleton<RabbitMqPublisher>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

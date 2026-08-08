@@ -28,7 +28,7 @@
       <div class="card-head">
         <div>
           <h2>Invoice details</h2>
-          <p class="card-head__sub">Amount and payment status are editable.</p>
+          <p class="card-head__sub">Only the payment status can be changed after creation.</p>
         </div>
       </div>
 
@@ -50,14 +50,9 @@
             <label for="amount">Amount (USD)</label>
             <span class="p-input-icon-left">
               <i class="pi pi-dollar"></i>
-              <input id="amount" type="number" step="0.01" min="0" pInputText formControlName="amount"
-                [class.p-invalid]="showError('amount')" />
+              <input id="amount" type="number" step="0.01" min="0" pInputText formControlName="amount" />
             </span>
-            @if (showError('amount')) {
-            <small class="field__error"><i class="pi pi-exclamation-circle"></i> Enter an amount of 0 or more.</small>
-            } @else {
-            <small class="field__hint">Stored in cents by the API; shown and edited in dollars.</small>
-            }
+            <small class="field__hint">Fixed at creation and can't be changed here.</small>
           </div>
 
           <div class="field">

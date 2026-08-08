@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using nextjs_backend.Events;
 using nextjs_backend.Grpc;
 using nextjs_backend.Models;
 using nextjs_backend.Models.FrontEnd;
+using nextjs_backend.Services;
 
 namespace nextjs_backend.Controllers
 {
@@ -17,10 +19,12 @@ namespace nextjs_backend.Controllers
     {
         nextjstestContext _nextjstestContext;
         CustomerLookup.CustomerLookupClient _customerLookup;
-        public InvoiceController(nextjstestContext nextjstestContext, CustomerLookup.CustomerLookupClient customerLookup)
+        RabbitMqPublisher _publisher;
+        public InvoiceController(nextjstestContext nextjstestContext, CustomerLookup.CustomerLookupClient customerLookup, RabbitMqPublisher publisher)
         {
             _nextjstestContext = nextjstestContext;
             _customerLookup = customerLookup;
+            _publisher = publisher;
         }
 
         [HttpGet]
@@ -92,23 +96,33 @@ namespace nextjs_backend.Controllers
         [HttpPost]
         public async Task<IActionResult> insertInvoice([FromBody] InsertedInvoice invoice)
         {
+            Invoice newInvoice = new()
+            {
+                Id = _nextjstestContext.Invoices.Max(i => i.Id) + 1,
+                CustomerId = invoice.customerId,
+                Amount = invoice.amount,
+                Status = invoice.status,
+                Date = DateTime.UtcNow
+            };
 
             try
             {
-                await _nextjstestContext.Invoices.AddAsync(new Invoice
-                {
-                    Id = _nextjstestContext.Invoices.Max(i => i.Id) + 1,
-                    CustomerId = invoice.customerId,
-                    Amount = invoice.amount,
-                    Status = invoice.status
-                });
-
+                await _nextjstestContext.Invoices.AddAsync(newInvoice);
                 await _nextjstestContext.SaveChangesAsync();
             }
             catch
             {
                 return StatusCode(500);
             }
+
+            await _publisher.PublishAsync("invoice.created", new InvoiceCreatedEvent
+            {
+                InvoiceId = newInvoice.Id,
+                CustomerId = newInvoice.CustomerId,
+                Amount = newInvoice.Amount,
+                Status = newInvoice.Status,
+                Date = newInvoice.Date
+            });
 
             return Ok();
         }
@@ -131,10 +145,10 @@ namespace nextjs_backend.Controllers
                 return BadRequest("Couldn't parse formula");
             }
             Invoice? oldInvoice = await _nextjstestContext.Invoices.FirstOrDefaultAsync(i => i.Id == invoice.id);
+            string previousStatus = oldInvoice.Status;
             try
             {
-                //oldInvoice.CustomerId = invoice.customerId;
-                oldInvoice.Amount = invoice.amount;
+                // Only the status is mutable after creation — amount/customer are fixed at insert time.
                 oldInvoice.Status = invoice.status;
 
                 await _nextjstestContext.SaveChangesAsync();
@@ -143,6 +157,16 @@ namespace nextjs_backend.Controllers
             {
                 return StatusCode(500);
             }
+
+            await _publisher.PublishAsync("invoice.updated", new InvoiceUpdatedEvent
+            {
+                InvoiceId = oldInvoice.Id,
+                CustomerId = oldInvoice.CustomerId,
+                Amount = oldInvoice.Amount,
+                OldStatus = previousStatus,
+                NewStatus = oldInvoice.Status,
+                Date = oldInvoice.Date
+            });
 
             return Ok();
         }
@@ -164,6 +188,15 @@ namespace nextjs_backend.Controllers
             {
                 return StatusCode(500);
             }
+
+            await _publisher.PublishAsync("invoice.deleted", new InvoiceDeletedEvent
+            {
+                InvoiceId = invoice.Id,
+                CustomerId = invoice.CustomerId,
+                Amount = invoice.Amount,
+                Status = invoice.Status,
+                Date = invoice.Date
+            });
 
             return Ok();
         }

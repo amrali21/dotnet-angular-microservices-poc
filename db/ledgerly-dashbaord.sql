@@ -24,21 +24,28 @@ IF OBJECT_ID(N'dbo.revenue', N'U') IS NULL
 BEGIN
     CREATE TABLE [dbo].[revenue](
         [month]   [varchar](4) NOT NULL,
+        [year]    [int]        NOT NULL,
         [revenue] [int]        NOT NULL,
-        CONSTRAINT [PK_revenue] PRIMARY KEY CLUSTERED ([month] ASC, [revenue] ASC),
-        CONSTRAINT [UQ_revenue_month] UNIQUE NONCLUSTERED ([month] ASC)
+        CONSTRAINT [PK_revenue] PRIMARY KEY CLUSTERED ([month] ASC, [year] ASC)
     );
 END
 GO
 
+
+/****** Table: kpis ******/
 IF OBJECT_ID(N'dbo.kpis', N'U') IS NULL
 BEGIN
-    CREATE TABLE [dbo].[kpis](
-        [totalbilled]  [int],
-        [collected] [int] ,
-	[outstanding] [int] ,
-        [customers] [int] 
-    );
+CREATE TABLE [dbo].[kpis](
+	[ID] [INT] not null,
+	[kpiname] nvarchar(200) not null,
+	[kpidesc] nvarchar(2000) null,
+	[kpivalue] int not null,
+PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+
 END
 GO
 
@@ -46,3 +53,4 @@ USE [master]
 GO
 ALTER DATABASE [ledgerly-dashbaord] SET READ_WRITE;
 GO
+

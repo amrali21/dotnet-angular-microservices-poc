@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using nextjs_backend_cust_service.Events;
 using nextjs_backend_cust_service.Models;
 using nextjs_backend_cust_service.Models.FrontEnd;
+using nextjs_backend_cust_service.Services;
 
 namespace nextjs_backend_cust_service.Controllers
 {
@@ -13,9 +15,40 @@ namespace nextjs_backend_cust_service.Controllers
     public class CustomerController : ControllerBase
     {
         nextjstestContext _nextjstestContext;
-        public CustomerController(nextjstestContext nextjstestContext)
+        RabbitMqPublisher _publisher;
+        public CustomerController(nextjstestContext nextjstestContext, RabbitMqPublisher publisher)
         {
             _nextjstestContext = nextjstestContext;
+            _publisher = publisher;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> insertCustomer([FromBody] InsertedCustomer customer)
+        {
+            Customer newCustomer = new()
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = customer.name,
+                Email = customer.email,
+                ImageUrl = customer.image_url
+            };
+
+            try
+            {
+                await _nextjstestContext.Customers.AddAsync(newCustomer);
+                await _nextjstestContext.SaveChangesAsync();
+            }
+            catch
+            {
+                return StatusCode(500);
+            }
+
+            await _publisher.PublishAsync("customer.created", new CustomerCreatedEvent
+            {
+                CustomerId = newCustomer.Id
+            });
+
+            return Ok();
         }
 
         [HttpGet]
@@ -145,6 +178,11 @@ namespace nextjs_backend_cust_service.Controllers
             {
                 return StatusCode(500);
             }
+
+            await _publisher.PublishAsync("customer.deleted", new CustomerDeletedEvent
+            {
+                CustomerId = customer.Id
+            });
 
             return Ok();
         }

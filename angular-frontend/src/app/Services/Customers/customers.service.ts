@@ -14,6 +14,9 @@ export class CustomersService {
   customersList = signal<Customer[]>([]);
   length = signal<number>(0);
 
+  /** Unpaged list, used by the invoice-create customer picker. */
+  allCustomers = signal<Customer[]>([]);
+
   /** Drives the table's loading / empty / error states. */
   loading = signal<boolean>(false);
   error = signal<string | null>(null);
@@ -53,6 +56,16 @@ export class CustomersService {
 
     const headers = new HttpHeaders().set('Accept', 'application/json');
     return this.http.get<PagedResult>(url, { params, headers });
+  }
+
+  loadAllCustomers(): void {
+    const url = `${ACTION_URL}/CustomerGW/Customer/fetchCustomers`;
+    const headers = new HttpHeaders().set('Accept', 'application/json');
+
+    this.http.get<Customer[]>(url, { headers }).subscribe({
+      next: list => this.allCustomers.set(list ?? []),
+      error: () => this.allCustomers.set([]),
+    });
   }
 
   /**

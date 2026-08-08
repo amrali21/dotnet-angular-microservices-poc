@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using nextjs_backend_dashboard_service.Models;
+using nextjs_backend_dashboard_service.Services;
 
 namespace nextjs_backend_dashboard_service.Controllers
 {
@@ -11,19 +12,25 @@ namespace nextjs_backend_dashboard_service.Controllers
     public class KPIController : ControllerBase
     {
         nextjstestContext _nextjstestContext;
-        public KPIController(nextjstestContext nextjstestContext)
+        KpiService _kpiService;
+        public KPIController(nextjstestContext nextjstestContext, KpiService kpiService)
         {
             _nextjstestContext = nextjstestContext;
+            _kpiService = kpiService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> getRevenue()
+        public async Task<IActionResult> getRevenue(int? year)
         {
-            var output = await _nextjstestContext.Revenues.Select(r => new
-            {
-                month = r.Month,
-                revenue = r.Revenue1
-            }).ToListAsync();
+            int targetYear = year ?? DateTime.UtcNow.Year;
+
+            var output = await _nextjstestContext.Revenues
+                .Where(r => r.Year == targetYear)
+                .Select(r => new
+                {
+                    month = r.Month,
+                    revenue = r.Revenue1 / 100
+                }).ToListAsync();
 
             return Ok(output);
         }
@@ -31,15 +38,7 @@ namespace nextjs_backend_dashboard_service.Controllers
         [HttpGet]
         public async Task<IActionResult> getCardData()
         {
-            var kpi = await _nextjstestContext.Kpis.FirstOrDefaultAsync();
-
-            return Ok(new
-            {
-                totalBilled = kpi?.TotalBilled ?? 0,
-                collected = kpi?.Collected ?? 0,
-                outstanding = kpi?.Outstanding ?? 0,
-                customers = kpi?.Customers ?? 0
-            });
+            return Ok(await _kpiService.GetCardDataAsync());
         }
 
         [HttpPut]
@@ -47,15 +46,10 @@ namespace nextjs_backend_dashboard_service.Controllers
         {
             try
             {
-                await _nextjstestContext.Kpis.ExecuteDeleteAsync();
-                await _nextjstestContext.Kpis.AddAsync(new Kpi
-                {
-                    TotalBilled = kpis.totalBilled,
-                    Collected = kpis.collected,
-                    Outstanding = kpis.outstanding,
-                    Customers = kpis.customers
-                });
-                await _nextjstestContext.SaveChangesAsync();
+                await _kpiService.SetMetricAsync(KpiService.TotalBilledMetric, kpis.totalBilled);
+                await _kpiService.SetMetricAsync(KpiService.CollectedMetric, kpis.collected);
+                await _kpiService.SetMetricAsync(KpiService.OutstandingMetric, kpis.outstanding);
+                await _kpiService.SetMetricAsync(KpiService.CustomersMetric, kpis.customers);
             }
             catch
             {
@@ -70,21 +64,7 @@ namespace nextjs_backend_dashboard_service.Controllers
         {
             try
             {
-                Revenue? existing = await _nextjstestContext.Revenues.FirstOrDefaultAsync(r => r.Month == revenue.month);
-                if (existing == null)
-                {
-                    await _nextjstestContext.Revenues.AddAsync(new Revenue
-                    {
-                        Month = revenue.month,
-                        Revenue1 = revenue.revenue
-                    });
-                }
-                else
-                {
-                    existing.Revenue1 = revenue.revenue;
-                }
-
-                await _nextjstestContext.SaveChangesAsync();
+                await _kpiService.UpsertRevenueAsync(revenue.month, revenue.year, revenue.revenue);
             }
             catch
             {
@@ -106,6 +86,7 @@ namespace nextjs_backend_dashboard_service.Controllers
     public class UpdatedRevenue
     {
         public string month { get; set; } = null!;
+        public int year { get; set; }
         public int revenue { get; set; }
     }
 }
