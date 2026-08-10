@@ -31,6 +31,11 @@ describe('SideNavComponent', () => {
   });
 
   it('should list every section', () => {
-    expect(component.items.map(item => item.label)).toEqual(['Overview', 'Invoices', 'Customers']);
+    expect(component.items.map(item => item.label)).toEqual(['Overview', 'Invoices', 'Customers', 'Payments', 'Reports', 'Settings']);
+  });
+
+  it('should mark placeholder items as todo', () => {
+    const todos = component.items.filter(item => item.todo);
+    expect(todos.map(item => item.label)).toEqual(['Payments', 'Reports', 'Settings']);
   });
 });

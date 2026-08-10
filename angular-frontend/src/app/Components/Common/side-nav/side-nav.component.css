@@ -130,6 +130,29 @@
     opacity: 1;
 }
 
+/* Placeholder items that aren't built yet — visible but not clickable */
+.nav__item--todo {
+    cursor: default;
+    opacity: .55;
+}
+
+.nav__item--todo:hover {
+    background: transparent;
+    color: var(--text-2);
+    cursor: default;
+}
+
+.nav__item-badge {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: .5625rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    padding: .1rem .35rem;
+    border-radius: 6px;
+    background: var(--surface-3);
+    color: var(--text-muted);
+}
+
 /* --- Footer --------------------------------------------------------------- */
 
 .nav__foot {

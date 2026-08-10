@@ -9,6 +9,8 @@ type NavItem = {
   /** The microservice that actually answers this screen's requests. */
   service: string;
   exact: boolean;
+  /** True for placeholder items that aren't built yet; they don't navigate anywhere. */
+  todo?: boolean;
 };
 
 @Component({
@@ -29,6 +31,9 @@ export class SideNavComponent {
     { label: 'Overview', route: '/', icon: 'pi-chart-bar', service: 'dashboard', exact: true },
     { label: 'Invoices', route: '/invoices', icon: 'pi-file', service: 'invoices', exact: false },
     { label: 'Customers', route: '/customers', icon: 'pi-users', service: 'customers', exact: false },
+    { label: 'Payments', route: '', icon: 'pi-credit-card', service: 'payments', exact: false, todo: true },
+    { label: 'Reports', route: '', icon: 'pi-chart-line', service: 'reports', exact: false, todo: true },
+    { label: 'Settings', route: '', icon: 'pi-cog', service: 'settings', exact: false, todo: true },
   ];
 
   readonly services = ['api-gateway', 'invoice-service', 'cust-service', 'dashboard-service', 'auth-service'];
