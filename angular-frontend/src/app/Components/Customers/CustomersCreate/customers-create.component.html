@@ -1,0 +1,66 @@
+<div class="page page--narrow">
+
+  <a class="back" routerLink="/customers"><i class="pi pi-arrow-left"></i> Back to customers</a>
+
+  <header class="page-head">
+    <div>
+      <h1 class="page-head__title">New customer</h1>
+      <p class="page-head__sub">Add an account to bill invoices against.</p>
+    </div>
+    <div class="page-head__tools">
+      <span class="service-chip">cust-service</span>
+    </div>
+  </header>
+
+  @if (error()) {
+  <div class="banner banner--error" role="alert">
+    <i class="pi pi-exclamation-triangle"></i>
+    <div>
+      <strong>Something went wrong</strong>
+      <p>{{ error() }}</p>
+    </div>
+  </div>
+  }
+
+  <section class="surface-card">
+    <div class="card-head">
+      <div>
+        <h2>Customer details</h2>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
+
+        <div class="field">
+          <label for="name">Name</label>
+          <input id="name" type="text" pInputText formControlName="name" [class.p-invalid]="showError('name')" />
+          @if (showError('name')) {
+          <small class="field__error"><i class="pi pi-exclamation-circle"></i> Enter a name.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" pInputText formControlName="email" [class.p-invalid]="showError('email')" />
+          @if (showError('email')) {
+          <small class="field__error"><i class="pi pi-exclamation-circle"></i> Enter a valid email address.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="image_url">Avatar URL</label>
+          <input id="image_url" type="text" pInputText formControlName="image_url" placeholder="Optional" />
+        </div>
+
+        <div class="form__actions">
+          <a class="btn btn--ghost" routerLink="/customers">Cancel</a>
+          <button type="submit" class="btn btn--primary" [disabled]="creating()">
+            <i class="pi" [ngClass]="creating() ? 'pi-spin pi-spinner' : 'pi-plus'"></i>
+            {{ creating() ? 'Creating…' : 'Create customer' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>

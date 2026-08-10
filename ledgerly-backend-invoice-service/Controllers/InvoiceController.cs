@@ -20,81 +20,96 @@ namespace ledgerly_backend.Controllers
         ledgerlytestContext _ledgerlytestContext;
         CustomerLookup.CustomerLookupClient _customerLookup;
         RabbitMqPublisher _publisher;
-        public InvoiceController(ledgerlytestContext ledgerlytestContext, CustomerLookup.CustomerLookupClient customerLookup, RabbitMqPublisher publisher)
+        ILogger<InvoiceController> _logger;
+        public InvoiceController(ledgerlytestContext ledgerlytestContext, CustomerLookup.CustomerLookupClient customerLookup, RabbitMqPublisher publisher, ILogger<InvoiceController> logger)
         {
             _ledgerlytestContext = ledgerlytestContext;
             _customerLookup = customerLookup;
             _publisher = publisher;
+            _logger = logger;
         }
 
         [HttpGet]
         public async Task<IActionResult> fetchFilteredInvoices(string? query, int itemsPerPage, int offset)
         {
-            var invoices = await _ledgerlytestContext.Invoices.ToListAsync();
-
-            CustomerIdListRequest idRequest = new();
-            idRequest.Ids.AddRange(invoices.Select(i => i.CustomerId).Distinct());
-            CustomerListReply customerList = await _customerLookup.GetCustomersByIdsAsync(idRequest);
-            Dictionary<string, CustomerReply> customersById = customerList.Customers.ToDictionary(c => c.Id);
-
-            var output = (from i in invoices
-                          where customersById.ContainsKey(i.CustomerId)
-                          let c = customersById[i.CustomerId]
-                          where query == null || (c.Name.Contains(query) || c.Email.Contains(query))
-                          select new
-                          {
-                              id = i.Id,
-                              amount = i.Amount,
-                              date = i.Date,
-                              status = i.Status,
-                              name = c.Name,
-                              email = c.Email,
-                              image_url = c.ImageUrl
-                          }).ToList();
-
-            return Ok(new
+            try
             {
-                data = output.Skip(offset).Take(itemsPerPage).ToList(),
-                count = output.Count
-            });
-        }
+                IQueryable<Invoice> invoiceQuery = _ledgerlytestContext.Invoices;
 
-        [HttpGet]
-        public async Task<IActionResult> fetchInvoicesPages(string? query)
-        {
-            var invoices = await _ledgerlytestContext.Invoices.ToListAsync();
+                if (!string.IsNullOrEmpty(query))
+                {
+                    // Search is against customer name/email, which live in cust-service —
+                    // resolve matching customer ids there first, so the invoices query
+                    // below can filter and paginate in SQL without ever reading the whole table.
+                    CustomerIdListReply searchReply = await _customerLookup.SearchCustomerIdsAsync(new CustomerSearchRequest { Query = query });
+                    HashSet<string> matchingIds = searchReply.Ids.ToHashSet();
+                    invoiceQuery = invoiceQuery.Where(i => matchingIds.Contains(i.CustomerId));
+                }
 
-            CustomerIdListRequest idRequest = new();
-            idRequest.Ids.AddRange(invoices.Select(i => i.CustomerId).Distinct());
-            CustomerListReply customerList = await _customerLookup.GetCustomersByIdsAsync(idRequest);
-            Dictionary<string, CustomerReply> customersById = customerList.Customers.ToDictionary(c => c.Id);
+                int count = await invoiceQuery.CountAsync();
+                List<Invoice> page = await invoiceQuery
+                    .OrderByDescending(i => i.Date)
+                    .ThenBy(i => i.Id)
+                    .Skip(offset)
+                    .Take(itemsPerPage)
+                    .ToListAsync();
 
-            int count = (from i in invoices
-                         where customersById.ContainsKey(i.CustomerId)
-                         let c = customersById[i.CustomerId]
-                         where query == null || (c.Name.Contains(query) || c.Email.Contains(query))
-                         select i.Id).Count();
+                CustomerIdListRequest pageRequest = new();
+                pageRequest.Ids.AddRange(page.Select(i => i.CustomerId).Distinct());
+                CustomerListReply pageReply = await _customerLookup.GetCustomersByIdsAsync(pageRequest);
+                Dictionary<string, CustomerReply> customersById = pageReply.Customers.ToDictionary(c => c.Id);
 
-            return Ok(count);
+                List<InvoiceListItem> data = page
+                    .Where(i => customersById.ContainsKey(i.CustomerId))
+                    .Select(i => new InvoiceListItem
+                    {
+                        id = i.Id,
+                        amount = i.Amount,
+                        date = i.Date,
+                        status = i.Status,
+                        name = customersById[i.CustomerId].Name,
+                        email = customersById[i.CustomerId].Email,
+                        image_url = customersById[i.CustomerId].ImageUrl
+                    }).ToList();
+
+                return Ok(new PagedResult<InvoiceListItem>
+                {
+                    data = data,
+                    count = count
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to fetch filtered invoices for query {Query}", query);
+                return StatusCode(500);
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> fetchInvoiceById(string id)
         {
-            Invoice? invoice = await _ledgerlytestContext.Invoices.FirstOrDefaultAsync(i => i.Id == id);
-            if (invoice == null)
-                return NotFound();
-
-            CustomerReply customer = await _customerLookup.GetCustomerByIdAsync(new CustomerIdRequest { Id = invoice.CustomerId });
-
-            return Ok(new
+            try
             {
-                id = invoice.Id,
-                name = customer.Found ? customer.Name : null,
-                customer_id = invoice.CustomerId,
-                amount = invoice.Amount,
-                status = invoice.Status
-            });
+                Invoice? invoice = await _ledgerlytestContext.Invoices.FirstOrDefaultAsync(i => i.Id == id);
+                if (invoice == null)
+                    return NotFound();
+
+                CustomerReply customer = await _customerLookup.GetCustomerByIdAsync(new CustomerIdRequest { Id = invoice.CustomerId });
+
+                return Ok(new InvoiceDetail
+                {
+                    id = invoice.Id,
+                    name = customer.Found ? customer.Name : null,
+                    customer_id = invoice.CustomerId,
+                    amount = invoice.Amount,
+                    status = invoice.Status
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to fetch invoice {InvoiceId}", id);
+                return StatusCode(500);
+            }
         }
 
         [HttpPost]
@@ -118,8 +133,9 @@ namespace ledgerly_backend.Controllers
                 await _ledgerlytestContext.Invoices.AddAsync(newInvoice);
                 await _ledgerlytestContext.SaveChangesAsync();
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to insert invoice for customer {CustomerId}", newInvoice.CustomerId);
                 return StatusCode(500);
             }
 
@@ -148,8 +164,9 @@ namespace ledgerly_backend.Controllers
                 if (invoice == null)
                     return BadRequest("Can't deserialize");
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogWarning(ex, "Failed to parse updateInvoice request body");
                 return BadRequest("Couldn't parse formula");
             }
             Invoice? oldInvoice = await _ledgerlytestContext.Invoices.FirstOrDefaultAsync(i => i.Id == invoice.id);
@@ -161,8 +178,9 @@ namespace ledgerly_backend.Controllers
 
                 await _ledgerlytestContext.SaveChangesAsync();
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to update invoice {InvoiceId}", oldInvoice.Id);
                 return StatusCode(500);
             }
 
@@ -192,8 +210,9 @@ namespace ledgerly_backend.Controllers
                 _ledgerlytestContext.Invoices.Remove(invoice);
                 await _ledgerlytestContext.SaveChangesAsync();
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to delete invoice {InvoiceId}", invoice.Id);
                 return StatusCode(500);
             }
 

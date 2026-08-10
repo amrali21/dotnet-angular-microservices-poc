@@ -1,6 +1,8 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { InputTextModule } from 'primeng/inputtext';
 import { CustomersService } from '../../../Services/Customers/customers.service';
 import { InvoicesService } from '../../../Services/Invoices/invoices.service';
 import { Customer, LatestInvoice } from '../../../Services/Models/models';
@@ -9,7 +11,7 @@ import { avatarColor, formatCents, formatDate, initials } from '../../../Shared/
 @Component({
   selector: 'app-customers-edit',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, InputTextModule],
   templateUrl: './customers-edit.component.html',
   styleUrl: './customers-edit.component.css'
 })
@@ -21,7 +23,11 @@ export class CustomersEditComponent implements OnInit {
 
   ID: string | null = '';
 
-  readonly customer = signal<Customer | null>(null);
+  readonly customer = this.customersService.currentCustomer;
+  readonly loading = this.customersService.loading;
+  readonly saving = this.customersService.saving;
+  readonly error = this.customersService.error;
+
   readonly invoices = signal<LatestInvoice[]>([]);
   readonly loadingInvoices = signal(false);
 
@@ -37,17 +43,24 @@ export class CustomersEditComponent implements OnInit {
 
   readonly outstandingCents = computed(() => this.billedCents() - this.paidCents());
 
+  get form(): FormGroup {
+    return this.customersService.editCustomerForm;
+  }
+
+  /** Only complain once the user has actually interacted with the field. */
+  showError(control: string): boolean {
+    const field = this.form.get(control);
+    return !!field && field.invalid && (field.dirty || field.touched);
+  }
+
   ngOnInit(): void {
     this.ID = this.route.snapshot.paramMap.get('id');
 
-    // cust-service exposes no fetch-by-id endpoint, so the record comes from the
-    // page the user navigated from. Opening this URL directly has nothing to read.
-    const found = this.customersService.findLoaded(this.ID);
-    this.customer.set(found);
-
-    if (found?.email) {
-      this.loadInvoices(found.email);
-    }
+    this.customersService.searchById(this.ID, customer => {
+      if (customer?.email) {
+        this.loadInvoices(customer.email);
+      }
+    });
   }
 
   /** invoice-service matches its query against customer name and email. */
@@ -60,6 +73,10 @@ export class CustomersEditComponent implements OnInit {
       },
       error: () => this.loadingInvoices.set(false),
     });
+  }
+
+  onSubmit(): void {
+    this.customersService.editCustomer();
   }
 
   readonly money = formatCents;

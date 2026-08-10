@@ -3,6 +3,7 @@ import { HomeComponent } from './Components/Home/home.component';
 import { CustomersComponent } from './Components/Customers/CustomersList/customers.component';
 import { InvoicesComponent } from './Components/Invoices/InvoicesList/invoices.component';
 import { CustomersEditComponent } from './Components/Customers/CustomersEdit/customers-edit.component';
+import { CustomersCreateComponent } from './Components/Customers/CustomersCreate/customers-create.component';
 import { InvoicesEditComponent } from './Components/Invoices/InvoicesEdit/invoices-edit.component';
 import { InvoicesCreateComponent } from './Components/Invoices/InvoicesCreate/invoices-create.component';
 import { LoginComponent } from './Components/Auth/Login/login.component';
@@ -16,6 +17,7 @@ export const routes: Routes = [
     { path: '', component: HomeComponent, canActivate: [authGuard] },
 
     { path: 'customers', component: CustomersComponent, canActivate: [authGuard] },
+    { path: 'customers/create', component: CustomersCreateComponent, canActivate: [authGuard] },
     { path: 'customers/:id', component: CustomersEditComponent, canActivate: [authGuard] },
 
     { path: 'invoices', component: InvoicesComponent, canActivate: [authGuard] },

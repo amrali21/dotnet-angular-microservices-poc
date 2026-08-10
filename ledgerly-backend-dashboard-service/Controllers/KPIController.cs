@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ledgerly_backend_dashboard_service.Models;
+using ledgerly_backend_dashboard_service.Models.FrontEnd;
 using ledgerly_backend_dashboard_service.Services;
 
 namespace ledgerly_backend_dashboard_service.Controllers
@@ -13,10 +14,12 @@ namespace ledgerly_backend_dashboard_service.Controllers
     {
         ledgerlytestContext _ledgerlytestContext;
         KpiService _kpiService;
-        public KPIController(ledgerlytestContext ledgerlytestContext, KpiService kpiService)
+        ILogger<KPIController> _logger;
+        public KPIController(ledgerlytestContext ledgerlytestContext, KpiService kpiService, ILogger<KPIController> logger)
         {
             _ledgerlytestContext = ledgerlytestContext;
             _kpiService = kpiService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -24,21 +27,35 @@ namespace ledgerly_backend_dashboard_service.Controllers
         {
             int targetYear = year ?? DateTime.UtcNow.Year;
 
-            var output = await _ledgerlytestContext.Revenues
-                .Where(r => r.Year == targetYear)
-                .Select(r => new
-                {
-                    month = r.Month,
-                    revenue = r.Revenue1 / 100
-                }).ToListAsync();
-
-            return Ok(output);
+            try
+            {
+                return Ok(await _ledgerlytestContext.Revenues
+                    .Where(r => r.Year == targetYear)
+                    .Select(r => new RevenuePoint
+                    {
+                        month = r.Month,
+                        revenue = r.Revenue1 / 100
+                    }).ToListAsync());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to fetch revenue for {Year}", targetYear);
+                return StatusCode(500);
+            }
         }
 
         [HttpGet]
         public async Task<IActionResult> getCardData()
         {
-            return Ok(await _kpiService.GetCardDataAsync());
+            try
+            {
+                return Ok(await _kpiService.GetCardDataAsync());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to fetch KPI card data");
+                return StatusCode(500);
+            }
         }
 
         [HttpPut]
@@ -51,8 +68,9 @@ namespace ledgerly_backend_dashboard_service.Controllers
                 await _kpiService.SetMetricAsync(KpiService.OutstandingMetric, kpis.outstanding);
                 await _kpiService.SetMetricAsync(KpiService.CustomersMetric, kpis.customers);
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to update KPIs");
                 return StatusCode(500);
             }
 
@@ -66,27 +84,13 @@ namespace ledgerly_backend_dashboard_service.Controllers
             {
                 await _kpiService.UpsertRevenueAsync(revenue.month, revenue.year, revenue.revenue);
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to update revenue for {Month}/{Year}", revenue.month, revenue.year);
                 return StatusCode(500);
             }
 
             return Ok();
         }
-    }
-
-    public class UpdatedKpis
-    {
-        public int totalBilled { get; set; }
-        public int collected { get; set; }
-        public int outstanding { get; set; }
-        public int customers { get; set; }
-    }
-
-    public class UpdatedRevenue
-    {
-        public string month { get; set; } = null!;
-        public int year { get; set; }
-        public int revenue { get; set; }
     }
 }

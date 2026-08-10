@@ -12,42 +12,60 @@ namespace ledgerly_backend_auth_service.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IJwtTokenService _jwtTokenService;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(UserManager<ApplicationUser> userManager, IJwtTokenService jwtTokenService)
+        public AuthController(UserManager<ApplicationUser> userManager, IJwtTokenService jwtTokenService, ILogger<AuthController> logger)
         {
             _userManager = userManager;
             _jwtTokenService = jwtTokenService;
+            _logger = logger;
         }
 
         [HttpPost]
         public async Task<IActionResult> Register(RegisterRequest request)
         {
-            var user = new ApplicationUser
+            try
             {
-                UserName = request.Email,
-                Email = request.Email,
-                DisplayName = request.Name
-            };
+                var user = new ApplicationUser
+                {
+                    UserName = request.Email,
+                    Email = request.Email,
+                    DisplayName = request.Name
+                };
 
-            var result = await _userManager.CreateAsync(user, request.Password);
-            if (!result.Succeeded)
-            {
-                return BadRequest(result.Errors.Select(e => e.Description));
+                var result = await _userManager.CreateAsync(user, request.Password);
+                if (!result.Succeeded)
+                {
+                    return BadRequest(result.Errors.Select(e => e.Description));
+                }
+
+                return Ok(BuildAuthResponse(user));
             }
-
-            return Ok(BuildAuthResponse(user));
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to register user {Email}", request.Email);
+                return StatusCode(500);
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> Login(LoginRequest request)
         {
-            var user = await _userManager.FindByEmailAsync(request.Email);
-            if (user is null || !await _userManager.CheckPasswordAsync(user, request.Password))
+            try
             {
-                return Unauthorized();
-            }
+                var user = await _userManager.FindByEmailAsync(request.Email);
+                if (user is null || !await _userManager.CheckPasswordAsync(user, request.Password))
+                {
+                    return Unauthorized();
+                }
 
-            return Ok(BuildAuthResponse(user));
+                return Ok(BuildAuthResponse(user));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed login attempt for {Email}", request.Email);
+                return StatusCode(500);
+            }
         }
 
         private AuthResponse BuildAuthResponse(ApplicationUser user)

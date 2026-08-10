@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ledgerly_backend_dashboard_service.Events;
 using ledgerly_backend_dashboard_service.Models;
+using ledgerly_backend_dashboard_service.Models.FrontEnd;
 
 namespace ledgerly_backend_dashboard_service.Services
 {
@@ -48,9 +49,9 @@ namespace ledgerly_backend_dashboard_service.Services
                     k => k.KpiValue + delta < 0 ? 0 : k.KpiValue + delta));
         }
 
-        public async Task<object> GetCardDataAsync()
+        public async Task<KpiCardData> GetCardDataAsync()
         {
-            return new
+            return new KpiCardData
             {
                 totalBilled = await GetMetricAsync(TotalBilledMetric),
                 collected = await GetMetricAsync(CollectedMetric),

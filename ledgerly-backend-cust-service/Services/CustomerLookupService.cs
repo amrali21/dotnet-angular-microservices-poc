@@ -34,6 +34,18 @@ namespace ledgerly_backend_cust_service.Services
             return reply;
         }
 
+        public override async Task<CustomerIdListReply> SearchCustomerIds(CustomerSearchRequest request, ServerCallContext context)
+        {
+            List<string> ids = await _context.Customers
+                .Where(c => c.Name.Contains(request.Query) || c.Email.Contains(request.Query))
+                .Select(c => c.Id)
+                .ToListAsync();
+
+            CustomerIdListReply reply = new();
+            reply.Ids.AddRange(ids);
+            return reply;
+        }
+
         private static CustomerReply ToReply(Customer customer) => new()
         {
             Id = customer.Id,
