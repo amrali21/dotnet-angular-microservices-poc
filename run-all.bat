@@ -20,43 +20,43 @@ echo ============================================
 echo  Building all projects...
 echo ============================================
 
-dotnet build "%ROOT%nextjs-backend-invoice-service\nextjs-backend.csproj" --configuration Debug
-if %errorlevel% neq 0 ( echo [FAILED] nextjs-backend build failed & exit /b %errorlevel% )
+dotnet build "%ROOT%ledgerly-backend-invoice-service\ledgerly-backend.csproj" --configuration Debug
+if %errorlevel% neq 0 ( echo [FAILED] ledgerly-backend build failed & exit /b %errorlevel% )
 
-dotnet build "%ROOT%nextjs-backend-cust-service\nextjs-backend-cust-service.csproj" --configuration Debug
-if %errorlevel% neq 0 ( echo [FAILED] nextjs-backend-cust-service build failed & exit /b %errorlevel% )
+dotnet build "%ROOT%ledgerly-backend-cust-service\ledgerly-backend-cust-service.csproj" --configuration Debug
+if %errorlevel% neq 0 ( echo [FAILED] ledgerly-backend-cust-service build failed & exit /b %errorlevel% )
 
-dotnet build "%ROOT%nextjs-backend-dashboard-service\nextjs-backend-dashboard-service.csproj" --configuration Debug
-if %errorlevel% neq 0 ( echo [FAILED] nextjs-backend-dashboard-service build failed & exit /b %errorlevel% )
+dotnet build "%ROOT%ledgerly-backend-dashboard-service\ledgerly-backend-dashboard-service.csproj" --configuration Debug
+if %errorlevel% neq 0 ( echo [FAILED] ledgerly-backend-dashboard-service build failed & exit /b %errorlevel% )
 
-dotnet build "%ROOT%nextjs-backend-auth-service\nextjs-backend-auth-service.csproj" --configuration Debug
-if %errorlevel% neq 0 ( echo [FAILED] nextjs-backend-auth-service build failed & exit /b %errorlevel% )
+dotnet build "%ROOT%ledgerly-backend-auth-service\ledgerly-backend-auth-service.csproj" --configuration Debug
+if %errorlevel% neq 0 ( echo [FAILED] ledgerly-backend-auth-service build failed & exit /b %errorlevel% )
 
-dotnet build "%ROOT%next-api-gateway\next-api-gateway.csproj" --configuration Debug
-if %errorlevel% neq 0 ( echo [FAILED] next-api-gateway build failed & exit /b %errorlevel% )
+dotnet build "%ROOT%ledgerly-api-gateway\ledgerly-api-gateway.csproj" --configuration Debug
+if %errorlevel% neq 0 ( echo [FAILED] ledgerly-api-gateway build failed & exit /b %errorlevel% )
 
 :start
 echo.
 echo ============================================
 echo  Starting all projects...
-echo  nextjs-backend         -> https://localhost:7052
-echo  nextjs-backend-cust    -> https://localhost:7099
-echo  nextjs-backend-dash    -> https://localhost:7063
-echo  nextjs-backend-auth    -> https://localhost:7109
-echo  next-api-gateway       -> https://localhost:7019
+echo  ledgerly-backend         -> https://localhost:7052
+echo  ledgerly-backend-cust    -> https://localhost:7099
+echo  ledgerly-backend-dash    -> https://localhost:7063
+echo  ledgerly-backend-auth    -> https://localhost:7109
+echo  ledgerly-api-gateway       -> https://localhost:7019
 echo  angular-frontend       -> http://localhost:4200
 echo ============================================
 echo.
 
-start "nextjs-backend" cmd /k "dotnet run --project "%ROOT%nextjs-backend-invoice-service\nextjs-backend.csproj" --launch-profile nextjs_backend"
+start "ledgerly-backend" cmd /k "dotnet run --project "%ROOT%ledgerly-backend-invoice-service\ledgerly-backend.csproj" --launch-profile ledgerly_backend"
 timeout /t 3 /nobreak >nul
-start "nextjs-backend-cust-service" cmd /k "dotnet run --project "%ROOT%nextjs-backend-cust-service\nextjs-backend-cust-service.csproj" --launch-profile https"
+start "ledgerly-backend-cust-service" cmd /k "dotnet run --project "%ROOT%ledgerly-backend-cust-service\ledgerly-backend-cust-service.csproj" --launch-profile https"
 timeout /t 3 /nobreak >nul
-start "nextjs-backend-dashboard-service" cmd /k "dotnet run --project "%ROOT%nextjs-backend-dashboard-service\nextjs-backend-dashboard-service.csproj" --launch-profile https"
+start "ledgerly-backend-dashboard-service" cmd /k "dotnet run --project "%ROOT%ledgerly-backend-dashboard-service\ledgerly-backend-dashboard-service.csproj" --launch-profile https"
 timeout /t 3 /nobreak >nul
-start "nextjs-backend-auth-service" cmd /k "dotnet run --project "%ROOT%nextjs-backend-auth-service\nextjs-backend-auth-service.csproj" --launch-profile https"
+start "ledgerly-backend-auth-service" cmd /k "dotnet run --project "%ROOT%ledgerly-backend-auth-service\ledgerly-backend-auth-service.csproj" --launch-profile https"
 timeout /t 3 /nobreak >nul
-start "next-api-gateway" cmd /k "dotnet run --project "%ROOT%next-api-gateway\next-api-gateway.csproj" --launch-profile https"
+start "ledgerly-api-gateway" cmd /k "dotnet run --project "%ROOT%ledgerly-api-gateway\ledgerly-api-gateway.csproj" --launch-profile https"
 timeout /t 3 /nobreak >nul
 start "angular-frontend" cmd /k "cd /d "%ROOT%angular-frontend" && npm start"
 

@@ -42,7 +42,7 @@ services:
 
   invoice-service:
     build:
-      context: ./nextjs-backend-invoice-service
+      context: ./ledgerly-backend-invoice-service
     image: xamrxxx/invoice-service:${TAG:-latest}
     container_name: invoice-service
     ports:
@@ -68,7 +68,7 @@ services:
 
   cust-service:
     build:
-      context: ./nextjs-backend-cust-service
+      context: ./ledgerly-backend-cust-service
     image: xamrxxx/cust-service:${TAG:-latest}
     container_name: cust-service
     ports:
@@ -97,7 +97,7 @@ services:
 
   dashboard-service:
     build:
-      context: ./nextjs-backend-dashboard-service
+      context: ./ledgerly-backend-dashboard-service
     image: xamrxxx/dashboard-service:${TAG:-latest}
     container_name: dashboard-service
     ports:
@@ -123,7 +123,7 @@ services:
 
   auth-service:
     build:
-      context: ./nextjs-backend-auth-service
+      context: ./ledgerly-backend-auth-service
     image: xamrxxx/auth-service:${TAG:-latest}
     container_name: auth-service
     ports:
@@ -146,7 +146,7 @@ services:
 
   api-gateway:
     build:
-      context: ./next-api-gateway
+      context: ./ledgerly-api-gateway
     image: xamrxxx/api-gateway:${TAG:-latest}
     container_name: api-gateway
     ports:

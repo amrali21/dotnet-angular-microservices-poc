@@ -2,11 +2,24 @@
 
 ## Multi-Project Convention
 
-When the user says **"make changes across 3 projects"** (or similar phrasing referring to multiple projects), it means apply the changes to all three of these .NET service projects:
+When the user says **"make changes across 4 projects"** (or similar phrasing referring to multiple projects), it means apply the changes to all four of these .NET service projects:
 
-1. `nextjs-backend-invoice-service/` — the main backend API
-2. `nextjs-backend-cust-service/` — the customer service
-3. `nextjs-backend-dashboard-service/` — the dashboard service
+1. `ledgerly-backend-invoice-service/` — the main backend API
+2. `ledgerly-backend-cust-service/` — the customer service
+3. `ledgerly-backend-dashboard-service/` — the dashboard service
+4. `ledgerly-backend-auth-service/` — issues/validates JWTs used by the other three
+
+## RabbitMQ Event Bus
+
+Services share a single topic exchange, `ledgerly.events`. `invoice-service` and
+`cust-service` only publish (`RabbitMqPublisher`, fire-and-forget — a broker
+hiccup is logged, never fails the request). `dashboard-service` is the only
+consumer (`RabbitMqConsumerService`), binding `invoice.*`/`customer.*` to
+`dashboard.kpi.queue` to keep its KPI table in sync. The consumer retries its
+initial broker connection with a 5s backoff instead of crashing the host —
+`depends_on: service_healthy` on `rabbitmq` reduces but doesn't eliminate the
+startup race, since RabbitMQ's ping-based healthcheck can pass slightly before
+the AMQP listener is ready.
 
 ## Kubernetes Deployment (`k8s/`)
 

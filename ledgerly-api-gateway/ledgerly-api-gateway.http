@@ -1,0 +1,6 @@
+@ledgerly_api_gateway_HostAddress = http://localhost:5286
+
+GET {{ledgerly_api_gateway_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

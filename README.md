@@ -9,14 +9,14 @@ where Eureka is dropped in favor of native Kubernetes service discovery.
 
 | Service | Folder | Tech | Local URL | Description |
 |---------|--------|------|-----------|-------------|
-| **Invoice service** | `nextjs-backend-invoice-service/` | .NET (ASP.NET Core) | `https://localhost:7052` (`:5052` http) | Main backend API — manages invoices. |
-| **Customer service** | `nextjs-backend-cust-service/` | .NET (ASP.NET Core) | `https://localhost:7099` (`:5246` http) | Manages customers. |
-| **Dashboard service** | `nextjs-backend-dashboard-service/` | .NET (ASP.NET Core) | `https://localhost:7063` (`:5208` http) | Serves dashboard KPIs / aggregated metrics. |
-| **API gateway** | `next-api-gateway/` | .NET + Ocelot | `https://localhost:7019` (`:8080` http) | Single entry point. Routes `/InvoiceGW`, `/CustomerGW`, `/Dashboard` to the matching service. |
+| **Invoice service** | `ledgerly-backend-invoice-service/` | .NET (ASP.NET Core) | `https://localhost:7052` (`:5052` http) | Main backend API — manages invoices. |
+| **Customer service** | `ledgerly-backend-cust-service/` | .NET (ASP.NET Core) | `https://localhost:7099` (`:5246` http) | Manages customers. |
+| **Dashboard service** | `ledgerly-backend-dashboard-service/` | .NET (ASP.NET Core) | `https://localhost:7063` (`:5208` http) | Serves dashboard KPIs / aggregated metrics. |
+| **API gateway** | `ledgerly-api-gateway/` | .NET + Ocelot | `https://localhost:7019` (`:8080` http) | Single entry point. Routes `/InvoiceGW`, `/CustomerGW`, `/Dashboard` to the matching service. |
 | **Eureka server** | `eureka-server/` | Java / Spring Boot | `http://localhost:8761` | Service registry/discovery. Used in local and Docker modes only — **not** used on Kubernetes. |
 | **Angular frontend** ("Ledgerly") | `angular-frontend/` | Angular SPA (PrimeNG) | `http://localhost:4200` | Billing console UI; calls the backend through the gateway. See [angular-frontend/README.md](angular-frontend/README.md). |
 
-All three .NET services share a SQL Server database (`nextjs-test`).
+All three .NET services share a SQL Server database (`ledgerly-test`).
 
 ### How discovery works
 - **Local / Docker:** services register themselves with **Eureka**, and the
@@ -55,7 +55,7 @@ run-all.bat
 - frontend → `http://localhost:4200`
 
 > Requires the .NET SDK, the Angular CLI (`ng`), a JDK (for Eureka), and a local
-> SQL Server with the `nextjs-test` database.
+> SQL Server with the `ledgerly-test` database.
 
 ### 2. Docker Compose
 
