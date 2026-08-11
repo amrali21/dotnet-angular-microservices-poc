@@ -1,8 +1,8 @@
 # .NET + Angular Microservices POC
 
-A proof-of-concept microservices stack: three .NET backend services behind an
-Ocelot API gateway, an Angular SPA frontend, and (for local/Docker runs) a
-Eureka service-discovery server. The same stack can also run on Kubernetes,
+A proof-of-concept microservices stack: four .NET backend services behind an
+Ocelot API gateway, an Angular SPA frontend, and a Eureka service-discovery
+server, for local/Docker runs. The same stack can also run on Kubernetes,
 where Eureka is dropped in favor of native Kubernetes service discovery.
 
 ## Services
@@ -12,13 +12,26 @@ where Eureka is dropped in favor of native Kubernetes service discovery.
 | **Invoice service** | `ledgerly-backend-invoice-service/` | .NET (ASP.NET Core) | `https://localhost:7052` (`:5052` http) | Main backend API — manages invoices. |
 | **Customer service** | `ledgerly-backend-cust-service/` | .NET (ASP.NET Core) | `https://localhost:7099` (`:5246` http) | Manages customers. |
 | **Dashboard service** | `ledgerly-backend-dashboard-service/` | .NET (ASP.NET Core) | `https://localhost:7063` (`:5208` http) | Serves dashboard KPIs / aggregated metrics. |
-| **API gateway** | `ledgerly-api-gateway/` | .NET + Ocelot | `https://localhost:7019` (`:8080` http) | Single entry point. Routes `/InvoiceGW`, `/CustomerGW`, `/Dashboard` to the matching service. |
+| **Auth service** | `ledgerly-backend-auth-service/` | .NET (ASP.NET Core) | `https://localhost:7109` (`:5109` http) | Issues/validates the JWTs used by the other three services. |
+| **API gateway** | `ledgerly-api-gateway/` | .NET + Ocelot | `https://localhost:7019` (`:8080` http) | Single entry point. Routes `/InvoiceGW`, `/CustomerGW`, `/Dashboard`, `/AuthGW` to the matching service. |
 | **Eureka server** | `eureka-server/` | Java / Spring Boot | `http://localhost:8761` | Service registry/discovery. Used in local and Docker modes only — **not** used on Kubernetes. |
 | **Angular frontend** ("Ledgerly") | `angular-frontend/` | Angular SPA (PrimeNG) | `http://localhost:4200` | Billing console UI; calls the backend through the gateway. See [angular-frontend/README.md](angular-frontend/README.md). |
 
-All three .NET services share a SQL Server database (`ledgerly-test`).
+### Databases
 
-### How discovery works
+Each of the four .NET services has its **own** SQL Server database — there is
+no shared database. **All four databases live on the host machine**, even
+when the services themselves run in Docker or Kubernetes — this keeps setup
+simple (no containerized SQL Server to manage):
+
+| Service | Database |
+|---------|----------|
+| Invoice service | `ledgerly-invoice` |
+| Customer service | `ledgerly-customer` |
+| Dashboard service | `ledgerly-dashbaord` |
+| Auth service | `ledgerly-auth` |
+
+### How service discovery works
 - **Local / Docker:** services register themselves with **Eureka**, and the
   Ocelot gateway resolves downstream services by name through Eureka.
 - **Kubernetes:** Eureka is removed. Each service is exposed by a Kubernetes
@@ -27,9 +40,36 @@ All three .NET services share a SQL Server database (`ledgerly-test`).
 
 ---
 
+## Prerequisites
+
+Install these on your host machine before running the project, in any mode:
+
+1. **JDK** (Java 11+) — to build/run the Eureka server (`eureka-server/`).
+   Needed for local and Docker modes; Kubernetes doesn't use Eureka.
+2. **SQL Server Express** — all four databases run on the host in every mode
+   (local, Docker, and Kubernetes). See [Databases](#databases) above.
+3. **.NET 10 SDK** (Developer Pack) — to build/run the services locally. Note:
+   `ledgerly-backend-invoice-service` targets `net6.0`, so the matching .NET 6
+   runtime is required alongside .NET 10.
+4. **RabbitMQ**, via Chocolatey — needed for local mode only (Docker Compose
+   and Kubernetes each run their own RabbitMQ container):
+   ```powershell
+   choco install rabbitmq -y
+   ```
+   This pulls in Erlang as a dependency — **restart the RabbitMQ service**
+   afterwards so it picks up the Erlang install:
+   ```powershell
+   Restart-Service RabbitMQ
+   ```
+5. **Create the databases** — run every script in [db/](db/) against your SQL
+   Server instance (creates the four databases, schema, and seed data) before
+   starting any service.
+
+---
+
 ## Running the project
 
-You can run the stack in three modes. (the DB is on the host pc in all 3 modes)
+You can run the stack in three modes.
 
 ### 1. Local (dotnet + Eureka)
 
@@ -51,11 +91,15 @@ run-all.bat
 - invoice  → `https://localhost:7052`
 - customer → `https://localhost:7099`
 - dashboard→ `https://localhost:7063`
+- auth     → `https://localhost:7109`
 - gateway  → `https://localhost:7019`
 - frontend → `http://localhost:4200`
 
-> Requires the .NET SDK, the Angular CLI (`ng`), a JDK (for Eureka), and a local
-> SQL Server with the `ledgerly-test` database.
+> **Connection string:** each service reads `ConnectionStrings:DefaultConnection`
+> from its own `appsettings.json` (e.g.
+> `ledgerly-backend-invoice-service/appsettings.json`). Update the `Data Source`,
+> `User ID`, and `Password` there to match your local SQL Server Express
+> instance.
 
 ### 2. Docker Compose
 
@@ -68,8 +112,13 @@ docker-compose up --build
 ```
 
 Exposed ports: frontend `4200`, gateway `8080`, invoice `5052`, customer `5246`,
-dashboard `5208`, Eureka `8761`. Services wait for Eureka to be healthy before
-starting.
+dashboard `5208`, auth `5109`, Eureka `8761`. Services wait for Eureka to be
+healthy before starting.
+
+> **Connection string:** copy `.env.example` to `.env` and set `SQL_USER` /
+> `SQL_PASSWORD`, plus one connection string per service — `INVOICE_DB`,
+> `CUSTOMER_DB`, `DASHBOARD_DB`, `AUTH_DB`. These are injected into each
+> container as `ConnectionStrings__DefaultConnection`.
 
 ### 3. Kubernetes
 
@@ -82,13 +131,17 @@ for maximum scalability (with HPAs autoscaling on CPU).
 A single **Ingress** is what allows connections into the Kubernetes cluster from
 outside — it is the only public entry point. It routes by path, and the most
 important entry point is **`/`**, which points to the Angular frontend (the
-`/InvoiceGW`, `/CustomerGW`, `/Dashboard` paths go to the gateway).
+`/InvoiceGW`, `/CustomerGW`, `/Dashboard`, `/AuthGW` paths go to the gateway).
+
+> **Connection string:** copy `k8s/01-db-secret.example.yaml` to
+> `k8s/01-db-secret.yaml` and fill in the `ConnectionStrings__DefaultConnection`
+> value in each of the four secrets. For local minikube testing, point at
+> `host.minikube.internal,1433` (not the `\SQLEXPRESS` named instance, and not
+> an AKS/cloud DB) — see the comments in the example file for the one-time SQL
+> Server Express config this requires.
 
 ```bash
 kubectl apply -k k8s/
-
-#check this
-notes: make sure db secret points to local db on host. not aks cloud db.
 
 # route local traffic to the ingress controller (instead of using `minikube tunnel`)
 kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8090:80
