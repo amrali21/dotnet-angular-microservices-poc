@@ -8,6 +8,7 @@ where Eureka is dropped in favor of native Kubernetes service discovery.
 ## Services
 
 ```mermaid
+%%{init: {'flowchart': {'nodeSpacing': 90, 'rankSpacing': 90, 'padding': 25}} }%%
 flowchart LR
     FE["Angular frontend<br/>Billing console UI"]
     GW["API gateway (Ocelot)<br/>Routes /InvoiceGW /CustomerGW<br/>/Dashboard /AuthGW"]
