@@ -7,15 +7,61 @@ where Eureka is dropped in favor of native Kubernetes service discovery.
 
 ## Services
 
-| Service | Folder | Tech | Local URL | Description |
-|---------|--------|------|-----------|-------------|
-| **Invoice service** | `ledgerly-backend-invoice-service/` | .NET (ASP.NET Core) | `https://localhost:7052` (`:5052` http) | Main backend API — manages invoices. |
-| **Customer service** | `ledgerly-backend-cust-service/` | .NET (ASP.NET Core) | `https://localhost:7099` (`:5246` http) | Manages customers. |
-| **Dashboard service** | `ledgerly-backend-dashboard-service/` | .NET (ASP.NET Core) | `https://localhost:7063` (`:5208` http) | Serves dashboard KPIs / aggregated metrics. |
-| **Auth service** | `ledgerly-backend-auth-service/` | .NET (ASP.NET Core) | `https://localhost:7109` (`:5109` http) | Issues/validates the JWTs used by the other three services. |
-| **API gateway** | `ledgerly-api-gateway/` | .NET + Ocelot | `https://localhost:7019` (`:8080` http) | Single entry point. Routes `/InvoiceGW`, `/CustomerGW`, `/Dashboard`, `/AuthGW` to the matching service. |
-| **Eureka server** | `eureka-server/` | Java / Spring Boot | `http://localhost:8761` | Service registry/discovery. Used in local and Docker modes only — **not** used on Kubernetes. |
-| **Angular frontend** ("Ledgerly") | `angular-frontend/` | Angular SPA (PrimeNG) | `http://localhost:4200` | Billing console UI; calls the backend through the gateway. See [angular-frontend/README.md](angular-frontend/README.md). |
+```mermaid
+flowchart LR
+    FE["Angular frontend<br/>Billing console UI"]
+    GW["API gateway (Ocelot)<br/>Routes /InvoiceGW /CustomerGW<br/>/Dashboard /AuthGW"]
+    EU(["Eureka server<br/>local &amp; Docker only"])
+
+    subgraph SVC["Services"]
+        direction TB
+        INV["Invoice service<br/>Manages invoices"]
+        CUST["Customer service<br/>Manages customers"]
+        DASH["Dashboard service<br/>Serves KPIs / aggregated metrics"]
+        AUTH["Auth service<br/>Issues &amp; validates JWTs"]
+    end
+
+    MQ{{"RabbitMQ<br/>ledgerly.events exchange"}}
+
+    FE --> GW
+    GW --> INV
+    GW --> CUST
+    GW --> DASH
+    GW --> AUTH
+
+    INV -- publish --> MQ
+    CUST -- publish --> MQ
+    MQ -- consume --> DASH
+
+    GW -. discovers via .-> EU
+
+    classDef gateway fill:#cfe2ff,stroke:#0d6efd,color:#03224c
+    classDef services fill:#d4f7dc,stroke:#198754,color:#0b3d20
+    classDef discovery fill:#e6d9ff,stroke:#6f42c1,color:#2c1a4d
+    classDef messaging fill:#ffe8cc,stroke:#fd7e14,color:#5c2c00
+    classDef client fill:#eef1f4,stroke:#6c757d,color:#2b2f33
+
+    class FE client
+    class GW gateway
+    class INV,CUST,DASH,AUTH services
+    class EU discovery
+    class MQ messaging
+```
+
+- **Blue** = gateway, **green** = the four backend services, **purple** =
+  service discovery, **orange** = messaging, **grey** = the frontend.
+- Solid arrows are live request/response traffic; the dashed arrow is
+  registration only. All four services also register with Eureka the same
+  way the gateway does (omitted from the diagram to avoid clutter). Eureka is
+  used in local & Docker modes only — on Kubernetes it's dropped in favor of
+  Kubernetes DNS + ClusterIP, see
+  [How service discovery works](#how-service-discovery-works).
+- `invoice-service` and `cust-service` only **publish** to RabbitMQ
+  (fire-and-forget — a broker hiccup is logged, never fails the request).
+  `dashboard-service` is the only **consumer**, binding `invoice.*` /
+  `customer.*` to `dashboard.kpi.queue` to keep its KPI table in sync.
+- `auth-service` issues JWTs; the other three validate them locally against a
+  shared signing key (config, not a runtime call to auth-service).
 
 ### Databases
 
