@@ -24,7 +24,7 @@ GO
 IF OBJECT_ID(N'dbo.invoices', N'U') IS NULL
 BEGIN
     CREATE TABLE [dbo].[invoices](
-        [id]          [varchar](255) NOT NULL,
+        [id] [int] identity(1,1) NOT NULL,
         [customer_id] [varchar](255) NOT NULL,
         [amount]      [int]          NOT NULL,
         [status]      [varchar](255) NOT NULL,

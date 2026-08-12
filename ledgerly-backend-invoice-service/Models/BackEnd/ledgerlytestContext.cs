@@ -30,9 +30,8 @@ namespace ledgerly_backend.Models
                 entity.ToTable("invoices");
 
                 entity.Property(e => e.Id)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("id");
+                    .HasColumnName("id")
+                    .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Amount).HasColumnName("amount");
 

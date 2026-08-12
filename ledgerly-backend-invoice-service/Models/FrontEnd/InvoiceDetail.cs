@@ -2,7 +2,7 @@ namespace ledgerly_backend.Models.FrontEnd
 {
     public class InvoiceDetail
     {
-        public string id { get; set; } = null!;
+        public int id { get; set; }
         public string? name { get; set; }
         public string customer_id { get; set; } = null!;
         public int amount { get; set; }
