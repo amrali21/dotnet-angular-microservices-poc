@@ -7,50 +7,8 @@ where Eureka is dropped in favor of native Kubernetes service discovery.
 
 ## Services
 
-```mermaid
-%%{init: {'flowchart': {'nodeSpacing': 90, 'rankSpacing': 90, 'padding': 25}} }%%
-flowchart LR
-    FE["Angular frontend<br/>Billing console UI"]
-    GW["API gateway (Ocelot)<br/>Routes /InvoiceGW /CustomerGW<br/>/Dashboard /AuthGW"]
-    EU(["Eureka server<br/>local &amp; Docker only"])
+![Architecture diagram](diagram.png)
 
-    subgraph SVC["Services"]
-        direction TB
-        INV["Invoice service<br/>Manages invoices"]
-        CUST["Customer service<br/>Manages customers"]
-        DASH["Dashboard service<br/>Serves KPIs / aggregated metrics"]
-        AUTH["Auth service<br/>Issues &amp; validates JWTs"]
-    end
-
-    MQ{{"RabbitMQ<br/>ledgerly.events exchange"}}
-
-    FE --> GW
-    GW --> INV
-    GW --> CUST
-    GW --> DASH
-    GW --> AUTH
-
-    INV -- publish --> MQ
-    CUST -- publish --> MQ
-    MQ -- consume --> DASH
-
-    GW -. discovers via .-> EU
-
-    classDef gateway fill:#cfe2ff,stroke:#0d6efd,color:#03224c
-    classDef services fill:#d4f7dc,stroke:#198754,color:#0b3d20
-    classDef discovery fill:#e6d9ff,stroke:#6f42c1,color:#2c1a4d
-    classDef messaging fill:#ffe8cc,stroke:#fd7e14,color:#5c2c00
-    classDef client fill:#eef1f4,stroke:#6c757d,color:#2b2f33
-
-    class FE client
-    class GW gateway
-    class INV,CUST,DASH,AUTH services
-    class EU discovery
-    class MQ messaging
-```
-
-- **Blue** = gateway, **green** = the four backend services, **purple** =
-  service discovery, **orange** = messaging, **grey** = the frontend.
 - Solid arrows are live request/response traffic; the dashed arrow is
   registration only. All four services also register with Eureka the same
   way the gateway does (omitted from the diagram to avoid clutter). Eureka is
