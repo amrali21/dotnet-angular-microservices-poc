@@ -1,0 +1,182 @@
+<svg viewBox="0 0 1560 760" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif">
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#555555"/>
+    </marker>
+    <marker id="arrowAccent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#ff6b35"/>
+    </marker>
+  </defs>
+
+  <g transform="translate(0,10)">
+
+    <!-- Services outer box -->
+    <rect x="636" y="4" width="918" height="580" rx="3" fill="#fdf7d4" stroke="#d9cd8e" stroke-width="1.5"/>
+    <text x="1097" y="26" text-anchor="middle" font-size="15" fill="#4a4a2e">Services</text>
+
+    <!-- Base arrows -->
+    <path d="M205,304 L262,304" fill="none" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <path d="M473,286 C558,232 602,182 662,152" fill="none" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <path d="M473,304 C548,300 606,302 662,304" fill="none" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <path d="M473,322 C558,378 606,436 662,476" fill="none" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <path d="M473,272 C560,58 900,52 1316,94" fill="none" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <path d="M473,345 C500,478 558,558 698,612" fill="none" stroke="#555555" stroke-width="1.3" stroke-dasharray="2 4" marker-end="url(#arrow)"/>
+    <path d="M873,175 C952,260 1000,450 1048,608" fill="none" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <path d="M873,478 C958,540 1008,580 1055,616" fill="none" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <path d="M1092,606 C1150,450 1300,248 1398,172" fill="none" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <!-- small labels -->
+    <g font-size="13" fill="#333333">
+      <rect x="900" y="140" width="64" height="24" rx="3" fill="#e2e2e2"/>
+      <text x="932" y="157" text-anchor="middle">publish</text>
+      <rect x="900" y="466" width="64" height="24" rx="3" fill="#e2e2e2"/>
+      <text x="932" y="483" text-anchor="middle">publish</text>
+      <rect x="1198" y="378" width="76" height="24" rx="3" fill="#e2e2e2"/>
+      <text x="1236" y="395" text-anchor="middle">consume</text>
+      <rect x="500" y="548" width="104" height="24" rx="3" fill="#e2e2e2"/>
+      <text x="552" y="565" text-anchor="middle">discovers via</text>
+    </g>
+
+    <!-- Nodes -->
+    <g font-size="15">
+      <rect x="10" y="270" width="195" height="68" rx="3" fill="#eceff1" stroke="#8a8f94" stroke-width="1.3"/>
+      <text x="107" y="298" text-anchor="middle" fill="#222">Angular frontend</text>
+      <text x="107" y="318" text-anchor="middle" fill="#222">Billing console UI</text>
+
+      <rect x="262" y="270" width="211" height="68" rx="3" fill="#d3e6fb" stroke="#5b9bd5" stroke-width="1.3"/>
+      <text x="367" y="298" text-anchor="middle" fill="#173a5e">API gateway</text>
+      <text x="367" y="318" text-anchor="middle" fill="#173a5e">(Ocelot)</text>
+
+      <rect x="662" y="108" width="211" height="88" rx="3" fill="#cdeed9" stroke="#63b583" stroke-width="1.3"/>
+      <text x="767" y="146" text-anchor="middle" fill="#1e4d34">Invoice service</text>
+      <text x="767" y="166" text-anchor="middle" fill="#1e4d34">Manages invoices</text>
+
+      <rect x="662" y="252" width="211" height="100" rx="3" fill="#cdeed9" stroke="#63b583" stroke-width="1.3"/>
+      <text x="767" y="288" text-anchor="middle" fill="#1e4d34">Auth service</text>
+      <text x="767" y="308" text-anchor="middle" fill="#1e4d34">Issues &amp; validates</text>
+      <text x="767" y="328" text-anchor="middle" fill="#1e4d34">JWTs</text>
+
+      <rect x="662" y="430" width="211" height="100" rx="3" fill="#cdeed9" stroke="#63b583" stroke-width="1.3"/>
+      <text x="767" y="466" text-anchor="middle" fill="#1e4d34">Customer service</text>
+      <text x="767" y="486" text-anchor="middle" fill="#1e4d34">Manages</text>
+      <text x="767" y="506" text-anchor="middle" fill="#1e4d34">customers</text>
+
+      <rect x="1316" y="44" width="212" height="126" rx="3" fill="#cdeed9" stroke="#63b583" stroke-width="1.3"/>
+      <text x="1422" y="76" text-anchor="middle" fill="#1e4d34">Dashboard service</text>
+      <text x="1422" y="96" text-anchor="middle" fill="#1e4d34">Serves KPIs /</text>
+      <text x="1422" y="116" text-anchor="middle" fill="#1e4d34">aggregated</text>
+      <text x="1422" y="136" text-anchor="middle" fill="#1e4d34">metrics</text>
+
+      <ellipse cx="770" cy="665" rx="95" ry="58" fill="#e6d6f5" stroke="#a97fd1" stroke-width="1.3"/>
+      <text x="770" y="654" text-anchor="middle" fill="#4a2a68">Eureka server</text>
+      <text x="770" y="674" text-anchor="middle" fill="#4a2a68">local &amp; Docker</text>
+      <text x="770" y="694" text-anchor="middle" fill="#4a2a68">only</text>
+
+      <polygon points="992,665 1037,607 1147,607 1192,665 1147,723 1037,723" fill="#ffdfb0" stroke="#e0993d" stroke-width="1.3"/>
+      <text x="1092" y="654" text-anchor="middle" fill="#7a4a12">RabbitMQ</text>
+      <text x="1092" y="674" text-anchor="middle" fill="#7a4a12">ledgerly.events</text>
+      <text x="1092" y="694" text-anchor="middle" fill="#7a4a12">exchange</text>
+    </g>
+
+    <!-- ================= ANIMATED STAGE OVERLAYS (14s loop, 6 stages) ================= -->
+    <!-- Each stage = highlighted nodes/arrows + a callout bubble placed right next to what's highlighted -->
+
+    <!-- Stage 1 : Frontend -> Gateway -->
+    <g opacity="0">
+      <animate attributeName="opacity" dur="12s" repeatCount="indefinite"
+        keyTimes="0;0.1583;0.1833;1" values="1;1;0;0"/>
+      <rect x="6" y="266" width="203" height="76" rx="5" fill="none" stroke="#ff6b35" stroke-width="3"/>
+      <rect x="258" y="266" width="219" height="76" rx="5" fill="none" stroke="#ff6b35" stroke-width="3"/>
+      <path d="M205,304 L262,304" fill="none" stroke="#ff6b35" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#arrowAccent)">
+        <animate attributeName="stroke-dashoffset" values="28;0" dur="0.6s" repeatCount="indefinite"/>
+      </path>
+      <g>
+        <rect x="6" y="176" width="300" height="64" rx="10" fill="#0f172a" fill-opacity="0.95" stroke="#ff6b35" stroke-width="1.5"/>
+        <text x="24" y="204" font-size="18" font-weight="600" fill="#ffffff">Frontend calls</text>
+        <text x="24" y="228" font-size="18" font-weight="600" fill="#ffffff">the API gateway</text>
+      </g>
+    </g>
+
+    <!-- Stage 2 : Gateway -> Invoice / Auth / Customer -->
+    <g opacity="0">
+      <animate attributeName="opacity" dur="12s" repeatCount="indefinite"
+        keyTimes="0;0.1833;0.2083;0.3583;0.3833;1" values="0;0;1;1;0;0"/>
+      <rect x="258" y="266" width="219" height="76" rx="5" fill="none" stroke="#ff6b35" stroke-width="3"/>
+      <rect x="658" y="104" width="219" height="96" rx="5" fill="none" stroke="#ff6b35" stroke-width="3"/>
+      <rect x="658" y="248" width="219" height="108" rx="5" fill="none" stroke="#ff6b35" stroke-width="3"/>
+      <rect x="658" y="426" width="219" height="108" rx="5" fill="none" stroke="#ff6b35" stroke-width="3"/>
+      <path d="M473,286 C558,232 602,182 662,152" fill="none" stroke="#ff6b35" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#arrowAccent)">
+        <animate attributeName="stroke-dashoffset" values="30;0" dur="0.6s" repeatCount="indefinite"/>
+      </path>
+      <path d="M473,304 C548,300 606,302 662,304" fill="none" stroke="#ff6b35" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#arrowAccent)">
+        <animate attributeName="stroke-dashoffset" values="30;0" dur="0.6s" repeatCount="indefinite"/>
+      </path>
+      <path d="M473,322 C558,378 606,436 662,476" fill="none" stroke="#ff6b35" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#arrowAccent)">
+        <animate attributeName="stroke-dashoffset" values="30;0" dur="0.6s" repeatCount="indefinite"/>
+      </path>
+      <g>
+        <rect x="486" y="36" width="290" height="64" rx="10" fill="#0f172a" fill-opacity="0.95" stroke="#ff6b35" stroke-width="1.5"/>
+        <text x="504" y="64" font-size="18" font-weight="600" fill="#ffffff">Ocelot routes to</text>
+        <text x="504" y="88" font-size="18" font-weight="600" fill="#ffffff">the right service</text>
+      </g>
+    </g>
+
+    <!-- Stage 3 : Gateway -> Eureka (discovery) -->
+    <g opacity="0">
+      <animate attributeName="opacity" dur="12s" repeatCount="indefinite"
+        keyTimes="0;0.3833;0.4083;0.525;0.55;1" values="0;0;1;1;0;0"/>
+      <rect x="258" y="266" width="219" height="76" rx="5" fill="none" stroke="#ff6b35" stroke-width="3"/>
+      <ellipse cx="770" cy="665" rx="99" ry="62" fill="none" stroke="#ff6b35" stroke-width="3"/>
+      <rect x="496" y="544" width="112" height="32" rx="4" fill="none" stroke="#ff6b35" stroke-width="2"/>
+      <path d="M473,345 C500,478 558,558 698,612" fill="none" stroke="#ff6b35" stroke-width="3" stroke-dasharray="3 5" marker-end="url(#arrowAccent)">
+        <animate attributeName="stroke-dashoffset" values="24;0" dur="0.5s" repeatCount="indefinite"/>
+      </path>
+      <g>
+        <rect x="172" y="626" width="320" height="64" rx="10" fill="#0f172a" fill-opacity="0.95" stroke="#ff6b35" stroke-width="1.5"/>
+        <text x="190" y="654" font-size="18" font-weight="600" fill="#ffffff">Registers &amp; discovered</text>
+        <text x="190" y="678" font-size="18" font-weight="600" fill="#ffffff">via Eureka</text>
+      </g>
+    </g>
+
+    <!-- Stage 4 : Invoice / Customer -> RabbitMQ (publish) -->
+    <g opacity="0">
+      <animate attributeName="opacity" dur="12s" repeatCount="indefinite"
+        keyTimes="0;0.55;0.575;0.7417;0.7667;1" values="0;0;1;1;0;0"/>
+      <rect x="658" y="104" width="219" height="96" rx="5" fill="none" stroke="#ff6b35" stroke-width="3"/>
+      <rect x="658" y="426" width="219" height="108" rx="5" fill="none" stroke="#ff6b35" stroke-width="3"/>
+      <polygon points="992,665 1037,607 1147,607 1192,665 1147,723 1037,723" fill="none" stroke="#ff6b35" stroke-width="3"/>
+      <path d="M873,175 C952,260 1000,450 1048,608" fill="none" stroke="#ff6b35" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#arrowAccent)">
+        <animate attributeName="stroke-dashoffset" values="30;0" dur="0.6s" repeatCount="indefinite"/>
+      </path>
+      <path d="M873,478 C958,540 1008,580 1055,616" fill="none" stroke="#ff6b35" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#arrowAccent)">
+        <animate attributeName="stroke-dashoffset" values="30;0" dur="0.6s" repeatCount="indefinite"/>
+      </path>
+      <g>
+        <rect x="920" y="212" width="290" height="64" rx="10" fill="#0f172a" fill-opacity="0.95" stroke="#ff6b35" stroke-width="1.5"/>
+        <text x="938" y="240" font-size="18" font-weight="600" fill="#ffffff">Invoice &amp; Customer</text>
+        <text x="938" y="264" font-size="18" font-weight="600" fill="#ffffff">publish events</text>
+      </g>
+    </g>
+
+    <!-- Stage 5 : RabbitMQ -> Dashboard (consume) -->
+    <g opacity="0">
+      <animate attributeName="opacity" dur="12s" repeatCount="indefinite"
+        keyTimes="0;0.7667;0.7917;0.975;1" values="0;0;1;1;0"/>
+      <polygon points="992,665 1037,607 1147,607 1192,665 1147,723 1037,723" fill="none" stroke="#ff6b35" stroke-width="3"/>
+      <rect x="1312" y="40" width="220" height="134" rx="5" fill="none" stroke="#ff6b35" stroke-width="3"/>
+      <path d="M1092,606 C1150,450 1300,248 1398,172" fill="none" stroke="#ff6b35" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#arrowAccent)">
+        <animate attributeName="stroke-dashoffset" values="34;0" dur="0.6s" repeatCount="indefinite"/>
+      </path>
+      <path d="M473,272 C560,58 900,52 1316,94" fill="none" stroke="#ff6b35" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#arrowAccent)">
+        <animate attributeName="stroke-dashoffset" values="34;0" dur="0.6s" repeatCount="indefinite"/>
+      </path>
+      <g>
+        <rect x="1110" y="256" width="290" height="64" rx="10" fill="#0f172a" fill-opacity="0.95" stroke="#ff6b35" stroke-width="1.5"/>
+        <text x="1128" y="284" font-size="18" font-weight="600" fill="#ffffff">Dashboard consumes</text>
+        <text x="1128" y="308" font-size="18" font-weight="600" fill="#ffffff">&amp; shows live KPIs</text>
+      </g>
+    </g>
+
+  </g>
+</svg>
