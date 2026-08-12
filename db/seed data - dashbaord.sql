@@ -11,30 +11,18 @@ INSERT INTO [ledgerly-dashbaord].[dbo].[kpis] (ID, kpiname, kpivalue) VALUES
 (4, 'Customers', 9);
 
 -- Revenue
--- One row per month for each year present in the seeded invoices (2022, 2023),
+-- One row per month for 2026, the only year present in the seeded invoices,
 -- value = sum of 'paid' invoice amounts whose date falls in that month/year.
 INSERT INTO [ledgerly-dashbaord].[dbo].[revenue] (month, year, revenue) VALUES
-('Jan', 2022, 0),
-('Feb', 2022, 0),
-('Mar', 2022, 0),
-('Apr', 2022, 0),
-('May', 2022, 0),
-('Jun', 2022, 1000),
-('Jul', 2022, 0),
-('Aug', 2022, 0),
-('Sep', 2022, 0),
-('Oct', 2022, 3040),
-('Nov', 2022, 0),
-('Dec', 2022, 0),
-('Jan', 2023, 0),
-('Feb', 2023, 0),
-('Mar', 2023, 0),
-('Apr', 2023, 0),
-('May', 2023, 0),
-('Jun', 2023, 51285),
-('Jul', 2023, 0),
-('Aug', 2023, 0),
-('Sep', 2023, 44800),
-('Oct', 2023, 0),
-('Nov', 2023, 0),
-('Dec', 2023, 0);
+('Jan', 2026, 8545),
+('Feb', 2026, 0),
+('Mar', 2026, 8945),
+('Apr', 2026, 0),
+('May', 2026, 1000),
+('Jun', 2026, 0),
+('Jul', 2026, 3040),
+('Aug', 2026, 44800),
+('Sep', 2026, 0),
+('Oct', 2026, 0),
+('Nov', 2026, 0),
+('Dec', 2026, 33795);
