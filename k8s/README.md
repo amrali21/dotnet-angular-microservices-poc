@@ -144,6 +144,10 @@ or an external-secrets operator over a file on disk.
 
 ```bash
 kubectl apply -k k8s/
+
+# route local traffic to the ingress controller (instead of using `minikube tunnel`)
+kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8090:80
+
 kubectl get pods -n microservices -w      # wait until all are Running/Ready
 ```
 
