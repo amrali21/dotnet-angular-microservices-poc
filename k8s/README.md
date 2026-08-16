@@ -204,8 +204,56 @@ kubectl delete -k k8s/
 
    > The local image and the pushed image are the **same content** — a tag is just
    > a pointer, so you build once, test locally, and push the identical bits.
-2. The ingress controller gets a real external load-balancer IP/hostname; create
-   a DNS record (`A`/`CNAME`) for your domain pointing at it, and set that domain
-   as the Ingress `host:`.
-3. Add TLS via cert-manager + a `tls:` block on the Ingress for HTTPS.
-4. Use a managed SQL instance for `db-secret`.
+2. Login to Azure from terminal using 'az login' command
+3. Configure kubectl to connect to your Kubernetes cluster using the az aks get-credentials 
+
+```bash
+az aks get-credentials --resource-group myResourceGroup --name myAKSCluster
+```
+
+4. Run kustomization.yaml on the aks cluster to start the App
+
+```bash
+kubectl apply -k k8s/
+kubectl get pods -n microservices -w      # wait until all are Running/Ready
+```
+
+6. **Install an ingress controller.** Unlike minikube (`minikube addons enable
+   ingress`), managed clusters don't ship one — `kubectl apply -k k8s/` only
+   creates the `Ingress` *resource*, which sits with no `ADDRESS` until
+   something implements the `nginx` `IngressClass`. This step runs from
+   wherever you're driving `kubectl`/`helm` (your laptop, Cloud Shell, CI) —
+   it only needs a kubeconfig pointing at the cluster; the controller itself
+   ends up running as pods inside AKS/EKS/GKE, not on your machine.
+
+   > **Need Helm first?** (`helm version` errors with "not recognized"): open
+   > PowerShell **as Administrator** (right-click → Run as administrator —
+   > required, Chocolatey refuses to install from a non-elevated shell) and run:
+   > ```powershell
+   > choco install kubernetes-helm -y
+   > ```
+   > No admin rights available? Use the manual install instead:
+   > <https://helm.sh/docs/intro/install/#from-binary-releases>.
+
+   Install [ingress-nginx](https://kubernetes.github.io/ingress-nginx/) itself
+   (each line is a separate command — run them one at a time; works the same
+   in cmd, PowerShell, or bash):
+   ```bash
+   helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+   helm repo update
+   helm install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx --create-namespace --set controller.service.type=LoadBalancer
+   ```
+   Azure/AWS/GCP provisions a real external load-balancer IP/hostname for it:
+   ```bash
+   kubectl get service --namespace ingress-nginx ingress-nginx-controller --output wide --watch
+   ```
+   Create a DNS record (`A`/`CNAME`) for your domain pointing at that IP, and
+   set that domain as the Ingress `host:` in `k8s/20-ingress.yaml`. Until then,
+   the load-balancer IP itself works directly (`http://<external-ip>/`).
+
+   To tear it down:
+   ```bash
+   helm uninstall ingress-nginx -n ingress-nginx
+   kubectl delete namespace ingress-nginx
+   ```
+7. Add TLS via cert-manager + a `tls:` block on the Ingress for HTTPS. (TODO)

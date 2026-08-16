@@ -21,7 +21,7 @@ spec:
           # ACTION_URL is relative ('') and the browser calls the API on the SAME
           # Ingress host (no CORS, no hard-coded localhost:8080). See k8s/README.md.
           image: angular-frontend:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
           resources:
