@@ -1,4 +1,4 @@
-# Lengerly: A .NET + Angular Microservices Simplified Reference Project
+# Ledgerly: A .NET + Angular Microservices Simplified Reference Project
 
 A simplified reference project for microservices
 architecture — a working boilerplate that demonstrates core patterns without
@@ -147,7 +147,7 @@ healthy before starting.
 > `CUSTOMER_DB`, `DASHBOARD_DB`, `AUTH_DB`. These are injected into each
 > container as `ConnectionStrings__DefaultConnection`.
 
-### 3. Kubernetes
+### 3. Kubernetes (Local + Deploy to AKS)
 
 On Kubernetes **Eureka is not used**. Instead, each deployment is exposed by a
 Kubernetes Service, and the API gateway routes traffic directly to those
@@ -178,4 +178,9 @@ Then open the app at **<http://myapp.local:8090>** (after mapping `myapp.local`
 to the minikube IP in your hosts file — see the k8s README).
 
 See **[k8s/README.md](k8s/README.md)** for full details — image builds, the DB
-secret, ingress setup, autoscaling, and moving to a cloud provider.
+secret, ingress setup, autoscaling, and Deploying to AKS cloud provider with detailed steps.
+
+### 4. Showcase & Running The Project
+[![IMAGE ALT TEXT HERE](
+https://img.youtube.com/vi/4XLzyGXY5Fg/0.jpg
+)](https://www.youtube.com/watch?v=4XLzyGXY5Fg)
