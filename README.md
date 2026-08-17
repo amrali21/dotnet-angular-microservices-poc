@@ -29,7 +29,7 @@ boilerplate to fork for your own microservices projects.
 
 ## Services
 
-![Architecture diagram](diagram.png)
+![Architecture diagram](architecture-intro.svg)
 
 - Solid arrows are live request/response traffic; the dashed arrow is
   registration only. All four services also register with Eureka the same

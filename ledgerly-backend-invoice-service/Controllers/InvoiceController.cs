@@ -86,7 +86,7 @@ namespace ledgerly_backend.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> fetchInvoiceById(string id)
+        public async Task<IActionResult> fetchInvoiceById(int id)
         {
             try
             {
@@ -121,7 +121,6 @@ namespace ledgerly_backend.Controllers
 
             Invoice newInvoice = new()
             {
-                Id = _ledgerlytestContext.Invoices.Max(i => i.Id) + 1,
                 CustomerId = invoice.customerId,
                 Amount = invoice.amount,
                 Status = invoice.status,
@@ -198,7 +197,7 @@ namespace ledgerly_backend.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> deleteInvoice(string id)
+        public async Task<IActionResult> deleteInvoice(int id)
         {
             if (!await _ledgerlytestContext.Invoices.AnyAsync(i => i.Id == id))
                 return BadRequest("invoice not found");
