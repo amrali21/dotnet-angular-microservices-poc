@@ -17,7 +17,7 @@ the noise of a real production system:
 - **JWT auth issued by its own service** — `auth-service` issues tokens; the
   other three validate them locally against a shared signing key.
 
-**Example event flow:** a user creates an invoice, then changes its status
+**Example Flow:** a user creates an invoice, then changes its status
 (e.g. Draft → Sent → Paid). Each change publishes an event to RabbitMQ, which
 `dashboard-service` consumes to update its KPIs in near real time — without
 invoice-service and dashboard-service ever calling each other directly.
