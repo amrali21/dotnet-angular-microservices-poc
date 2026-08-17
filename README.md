@@ -1,9 +1,31 @@
-# .NET + Angular Microservices POC
+# Lengerly: A .NET + Angular Microservices Simplified Reference Project
 
-A proof-of-concept microservices stack: four .NET backend services behind an
-Ocelot API gateway, an Angular SPA frontend, and a Eureka service-discovery
-server, for local/Docker runs. The same stack can also run on Kubernetes,
-where Eureka is dropped in favor of native Kubernetes service discovery.
+A simplified reference project for microservices
+architecture — a working boilerplate that demonstrates core patterns without
+the noise of a real production system:
+
+- **Database-per-service** — four .NET services, four independent SQL Server
+  databases, no shared schema.
+- **gRPC for synchronous service-to-service calls** — `invoice-service` looks
+  up customer data from `cust-service` over gRPC instead of a chatty REST call.
+- **RabbitMQ for asynchronous events** — `invoice-service` and `cust-service`
+  publish fire-and-forget events to a shared topic exchange; `dashboard-service`
+  consumes them to keep a read-optimized KPI table in sync, so the dashboard
+  never queries the other services' databases directly.
+- **API gateway + service discovery** — Ocelot fronts all four services, with
+  Eureka (local/Docker) or Kubernetes DNS (K8s) resolving them by name.
+- **JWT auth issued by its own service** — `auth-service` issues tokens; the
+  other three validate them locally against a shared signing key.
+
+**Example event flow:** a user creates an invoice, then changes its status
+(e.g. Draft → Sent → Paid). Each change publishes an event to RabbitMQ, which
+`dashboard-service` consumes to update its KPIs in near real time — without
+invoice-service and dashboard-service ever calling each other directly.
+
+The README below is also a step-by-step guide for running the exact same
+stack three ways — **locally with dotnet**, **Docker Compose**, and
+**Kubernetes (local via minikube, or cloud)** — making this a useful
+boilerplate to fork for your own microservices projects.
 
 ## Services
 
